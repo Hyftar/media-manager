@@ -265,7 +265,7 @@
 
       # Immich
       immich-server:
-        container_name: immich-server
+        container_name: immich_server
         group_add:
           - 2007
         image: ghcr.io/immich-app/immich-server:''${IMMICH_VERSION:-release}
@@ -277,14 +277,14 @@
         ports:
           - '2283:2283'
         depends_on:
-          - immich-redis
-          - immich-database
+          - redis
+          - database
         restart: unless-stopped
         healthcheck:
           disable: false
 
       immich-machine-learning:
-        container_name: immich-machine_learning
+        container_name: immich_machine_learning
         group_add:
           - 2007
         image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
@@ -296,8 +296,8 @@
         healthcheck:
           disable: false
 
-      immich-redis:
-        container_name: immich-redis
+      redis:
+        container_name: immich_redis
         group_add:
           - 2007
         image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
@@ -305,8 +305,8 @@
           test: redis-cli ping || exit 1
         restart: unless-stopped
 
-      immich-database:
-        container_name: immich-postgres
+      database:
+        container_name: immich_postgres
         group_add:
           - 2007
         image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
