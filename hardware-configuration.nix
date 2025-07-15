@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  config.allowUnfree = true; # NVIDIA drivers have an unfree license
+
   # Enable Docker
   virtualisation.docker.enable = true;
 
