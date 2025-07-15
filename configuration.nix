@@ -99,7 +99,7 @@
         createHome = false;
         description = "Emby user";
         group = "emby";
-        extraGroups = [ "media" ];
+        extraGroups = [ "media" "render" "video" ];
         uid = 900;
       };
 
