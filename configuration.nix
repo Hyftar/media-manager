@@ -265,7 +265,7 @@
       immich-server:
         container_name: immich-server
         group_add:
-          - immich
+          - 2007
         image: ghcr.io/immich-app/immich-server:''${IMMICH_VERSION:-release}
         volumes:
           - ''${UPLOAD_LOCATION}:/usr/src/app/upload
@@ -284,7 +284,7 @@
       immich-machine-learning:
         container_name: immich-machine_learning
         group_add:
-          - immich
+          - 2007
         image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
         volumes:
           - model-cache:/cache
@@ -297,7 +297,7 @@
       immich-redis:
         container_name: immich-redis
         group_add:
-          - immich
+          - 2007
         image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
         healthcheck:
           test: redis-cli ping || exit 1
@@ -306,7 +306,7 @@
       immich-database:
         container_name: immich-postgres
         group_add:
-          - immich
+          - 2007
         image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
         environment:
           POSTGRES_PASSWORD: ''${DB_PASSWORD}
