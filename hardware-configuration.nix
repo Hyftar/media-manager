@@ -32,7 +32,7 @@
 
   # Root file system
   fileSystems."/" = {
-    device = "/dev/sda1";
+    device = "/dev/sda2";
     fsType = "ext4";
   };
 
