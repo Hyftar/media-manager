@@ -139,6 +139,7 @@
     "Z /mnt/storage/animes 0775 hyftar media -"
     "d /mnt/storage/immich 0755 immich immich -"
     "Z /mnt/storage/immich 0755 immich immich -"
+    "d /mnt/storage/immich/db 0755 999 999 -" # PostgreSQL runs as uid 999 in container
     "d /mnt/storage/caddy 0755 caddy caddy -"
     "Z /mnt/storage/caddy 0755 caddy caddy -"
     "d /var/lib/docker-compose 0755 root root -"
@@ -263,7 +264,7 @@
           POSTGRES_USER: immich
           POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
           POSTGRES_DB: immich
-          POSTGRES_INITDB_ARGS: '--data-checksums'
+          POSTGRES_INITDB_ARGS: '--data-checksums --locale=C'
         volumes:
           - /mnt/storage/immich/db:/var/lib/postgresql/data
         healthcheck:
@@ -287,7 +288,6 @@
           REDIS_HOSTNAME: immich-redis
           UPLOAD_LOCATION: /usr/src/app/upload
           JWT_SECRET: D1FeVpp1hKrTsjA0iR17GIZT0jHCWCdN+9Le2/BZR7eeqxHclqiJX6ufpgsanv2y
-          POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
           NODE_ENV: production
           LOG_LEVEL: verbose
           TZ: America/New_York
