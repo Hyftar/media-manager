@@ -137,11 +137,11 @@
     "Z /mnt/storage/movies 0775 hyftar media -"
     "d /mnt/storage/animes 0775 hyftar media -"
     "Z /mnt/storage/animes 0775 hyftar media -"
-    "d /mnt/storage/immich 0755 immich immich -"
-    "d /mnt/storage/immich/upload 0755 immich immich -"
-    "d /mnt/storage/immich/db 0755 immich immich -"
-    "d /mnt/storage/caddy 0755 caddy caddy -"
-    "Z /mnt/storage/caddy 0755 caddy caddy -"
+    "d /mnt/storage/immich 0775 immich immich -"
+    "d /mnt/storage/immich/upload 0775 immich immich -"
+    "d /mnt/storage/immich/data 0775 immich immich -"
+    "d /mnt/storage/caddy 0775 caddy caddy -"
+    "Z /mnt/storage/caddy 0775 caddy caddy -"
     "d /var/lib/docker-compose 0755 root root -"
   ];
 
@@ -168,7 +168,7 @@
 
     # Immich subdomain
     photos.grosluxe.ca {
-      reverse_proxy immich:3001
+      reverse_proxy immich:2283
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -192,6 +192,20 @@
         Referrer-Policy "strict-origin-when-cross-origin"
       }
     }
+  '';
+
+  # Immich .env file
+  environment.etc."docker-compose/.immich-env".text = ''
+    UPLOAD_LOCATION=/mnt/storage/immich/upload
+    DB_DATA_LOCATION=/mnt/storage/immich/data
+
+    TZ=America/Toronto
+    IMMICH_VERSION=release
+    DB_PASSWORD=postgres
+
+    # The values below this line do not need to be changed
+    DB_USERNAME=postgres
+    DB_DATABASE_NAME=immich
   '';
 
   # Create docker-compose configuration
@@ -245,64 +259,65 @@
         networks:
           - media-network
 
-      # Immich photo management
-      immich-redis:
-        image: redis:7-alpine
-        container_name: immich-redis
-        restart: unless-stopped
-        healthcheck:
-          test: redis-cli ping || exit 1
-        networks:
-          - media-network
-
-      # Immich database
-      immich-db:
-        image: postgres:15-alpine
-        container_name: immich-db
-        restart: unless-stopped
-        user: "901:2007"
-        environment:
-          POSTGRES_USER: immich
-          POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
-          POSTGRES_DB: immich
-          POSTGRES_INITDB_ARGS: '--data-checksums --locale=C'
+      # Immich
+      immich-server:
+        container_name: immich-server
+        group_add:
+          - immich
+        image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
         volumes:
-          - /mnt/storage/immich/db:/var/lib/postgresql/data
-        healthcheck:
-          test: pg_isready --dbname=immich --username=immich
-          interval: 5s
-          timeout: 5s
-          retries: 5
-        networks:
-          - media-network
-
-      # Immich server
-      immich:
-        image: ghcr.io/immich-app/immich-server:release
-        container_name: immich
-        restart: unless-stopped
-        environment:
-          DB_HOSTNAME: immich-db
-          DB_USERNAME: immich
-          DB_PASSWORD: view_FRENCH_garden_CONTAIN
-          DB_DATABASE_NAME: immich
-          REDIS_HOSTNAME: immich-redis
-          UPLOAD_LOCATION: /usr/src/app/upload
-          JWT_SECRET: D1FeVpp1hKrTsjA0iR17GIZT0jHCWCdN+9Le2/BZR7eeqxHclqiJX6ufpgsanv2y
-          NODE_ENV: production
-          LOG_LEVEL: verbose
-          TZ: America/New_York
-        volumes:
-          - /mnt/storage/immich/upload:/usr/src/app/upload
+          - ${UPLOAD_LOCATION}:/usr/src/app/upload
+          - /etc/localtime:/etc/localtime:ro
+        env_file:
+          - .immich-env
         ports:
-          - "3001:3001"
+          - '2283:2283'
         depends_on:
-          immich-db:
-            condition: service_healthy
-          immich-redis:
-            condition: service_healthy
-        networks:
-          - media-network
+          - immich-redis
+          - immich-database
+        restart: unless-stopped
+        healthcheck:
+          disable: false
+
+        immich-machine-learning:
+          container_name: immich-machine_learning
+          group_add:
+            - immich
+          image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+          volumes:
+            - model-cache:/cache
+          env_file:
+            - .immich-env
+          restart: unless-stopped
+          healthcheck:
+            disable: false
+
+        immich-redis:
+          container_name: immich-redis
+          group_add:
+            - immich
+          image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
+          healthcheck:
+            test: redis-cli ping || exit 1
+          restart: unless-stopped
+
+        immich-database:
+          container_name: immich-postgres
+          group_add:
+            - immich
+          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+          environment:
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_DB: ${DB_DATABASE_NAME}
+            POSTGRES_INITDB_ARGS: '--data-checksums'
+            DB_STORAGE_TYPE: 'HDD'
+          volumes:
+            - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+          restart: unless-stopped
+
+      volumes:
+        model-cache:
   '';
 
   # Systemd service to manage docker-compose (depends on certificates)
