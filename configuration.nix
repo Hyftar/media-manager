@@ -260,7 +260,7 @@
         image: postgres:15-alpine
         container_name: immich-db
         restart: unless-stopped
-        user: immich
+        user: "901:2007"
         environment:
           POSTGRES_USER: immich
           POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
