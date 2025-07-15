@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 {
   nixpkgs.config.allowUnfree = true; # NVIDIA drivers have an unfree license
+  nixpkgs.config.nvidia.acceptLicense = true;
 
   # Enable Docker
   virtualisation.docker.enable = true;
