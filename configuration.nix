@@ -5,6 +5,8 @@
     devices = [ "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292" ];
   };
 
+  time.timeZone = "America/Toronto";
+
   # Enable SSH
   services.openssh = {
     enable = true;
