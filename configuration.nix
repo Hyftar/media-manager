@@ -175,7 +175,13 @@
           - "8096:8096"  # Emby web interface
         devices:
           - /dev/dri:/dev/dri  # For hardware acceleration
-        runtime: nvidia  # Use NVIDIA runtime for GPU acceleration
+        deploy:
+          resources:
+            reservations:
+              devices:
+                - driver: nvidia
+                  count: 1
+                  capabilities: [gpu]
         networks:
           - media-network
 
