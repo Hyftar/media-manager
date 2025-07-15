@@ -1,5 +1,10 @@
 { config, pkgs, ... }:
 {
+  boot.loader.grub = {
+    enable = true;
+    devices = [ "/dev/sda" ];
+  };
+
   # Enable SSH
   services.openssh = {
     enable = true;

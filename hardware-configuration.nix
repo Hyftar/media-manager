@@ -35,11 +35,6 @@
     fsType = "ext4";
   };
 
-  boot.loader.grub = {
-    enable = true;
-    devices = [ "/dev/sda" ];
-  };
-
   # Media HDD
   fileSystems."/mnt/storage" = {
     device = "/dev/sdb1";
