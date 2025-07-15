@@ -111,7 +111,7 @@
         group = "caddy";
         extraGroups = [ ];
         uid = 902;
-      }
+      };
     };
   };
 
