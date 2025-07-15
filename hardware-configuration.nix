@@ -30,13 +30,18 @@
   # Add NVIDIA runtime for Docker containers (for hardware acceleration)
   virtualisation.docker.enableNvidia = true;
 
-
-  # Media HDD
-  fileSsystems."/" = {
+  # Root file system
+  fileSystems."/" = {
     device = "/dev/sda1";
     fsType = "ext4";
-  }
+  };
 
+  boot.loader.grub = {
+    enable = true;
+    devices = [ "/dev/sda" ];
+  };
+
+  # Media HDD
   fileSystems."/mnt/storage" = {
     device = "/dev/sdb1";
     fsType = "ext4";
