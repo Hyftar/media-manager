@@ -290,9 +290,9 @@
           POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
           NODE_ENV: production
           LOG_LEVEL: verbose
+          TZ: America/New_York
         volumes:
           - /mnt/storage/immich/upload:/usr/src/app/upload
-          - /etc/localtime:/etc/localtime:ro
         ports:
           - "3001:3001"
         depends_on:
