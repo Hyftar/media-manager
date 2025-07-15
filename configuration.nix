@@ -70,6 +70,14 @@
       immich = {
         gid = 2007;
       };
+
+      emby = {
+        gid = 2008;
+      };
+
+      caddy = {
+        gid = 2009;
+      };
     };
 
     users = {
