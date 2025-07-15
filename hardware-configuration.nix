@@ -3,15 +3,15 @@
   nixpkgs.config.allowUnfree = true; # NVIDIA drivers have an unfree license
   nixpkgs.config.nvidia.acceptLicense = true;
 
-  # NVIDIA GTX 570 Graphics Configuration
+  # NVIDIA GTX 750 Graphics Configuration
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
-  # hardware.nvidia-container-toolkit.enable = true; # newer config, not supported with legacy cards
+  hardware.nvidia-container-toolkit.enable = true;
 
-  # Configure NVIDIA driver for GTX 570 (legacy card)
+  # Configure NVIDIA driver for GTX 750 Ti
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_390;
+    package = config.boot.kernelPackages.nvidiaPackages.production;
 
     nvidiaSettings = false;
 
@@ -23,10 +23,6 @@
 
     modesetting.enable = true;
   };
-
-  # NVIDIA Docker Configuration (deprecated but only option for legacy cards)
-  virtualisation.docker.enableNvidia = true;
-
   # Root file system
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";

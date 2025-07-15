@@ -243,8 +243,7 @@
           - 8096:8096
           - 8920:8920
         devices:
-          - /dev/dri:/dev/dri  # For hardware acceleration
-        runtime: nvidia
+          - /dev/dri:/dev/dri
         networks:
           - media-network
 
