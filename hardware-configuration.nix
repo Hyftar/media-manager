@@ -3,14 +3,11 @@
   nixpkgs.config.allowUnfree = true; # NVIDIA drivers have an unfree license
   nixpkgs.config.nvidia.acceptLicense = true;
 
-  # Enable Docker
-  virtualisation.docker.enable = true;
-
-
   # NVIDIA GTX 570 Graphics Configuration
   services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia-container-toolkit.enable = true; # Enable container toolkit for Docker
+  hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
-  hardware.opengl.enable = true;
 
   # Configure NVIDIA driver for GTX 570 (legacy card)
   hardware.nvidia = {
