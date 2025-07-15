@@ -310,6 +310,7 @@
     wget
     nvidia-docker
     neovim
+    git
   ];
 
   # Enable and start Docker service
