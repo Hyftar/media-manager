@@ -2,7 +2,7 @@
 {
   boot.loader.grub = {
     enable = true;
-    devices = [ "/dev/disk/by-partlabel/BOOT" ];
+    devices = [ "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292" ];
   };
 
   # Enable SSH
