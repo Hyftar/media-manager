@@ -170,7 +170,9 @@
           - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
         volumes:
           - /mnt/storage/emby/config:/config
-          - /mnt/storage/emby/media:/media
+          - /mnt/storage/movies:/media/movies
+          - /mnt/storage/series:/media/series
+          - /mnt/storage/animes:/media/animes
         ports:
           - "8096:8096"  # Emby web interface
         devices:
@@ -180,45 +182,61 @@
           - media-network
 
       # Immich photo management
-      immich:
-        image: ghcr.io/immich-app/immich-server:release
-        container_name: immich
+      immich-redis:
+        image: redis:7-alpine
+        container_name: immich-redis
         restart: unless-stopped
-        environment:
-          - DB_HOSTNAME=immich-db
-          - DB_USERNAME=immich
-          - DB_PASSWORD=immich_password
-          - DB_DATABASE_NAME=immich
-          - REDIS_HOSTNAME=immich-redis
-        volumes:
-          - /mnt/storage/immich/upload:/usr/src/app/upload
-        ports:
-          - "3001:3001"
-        depends_on:
-          - immich-db
-          - immich-redis
+        healthcheck:
+          test: redis-cli ping || exit 1
         networks:
           - media-network
 
       # Immich database
       immich-db:
-        image: postgres:15
+        image: postgres:15-alpine
         container_name: immich-db
         restart: unless-stopped
         environment:
-          - POSTGRES_USER=immich
-          - POSTGRES_PASSWORD=immich_password
-          - POSTGRES_DB=immich
+          POSTGRES_USER: immich
+          POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
+          POSTGRES_DB: immich
+          POSTGRES_INITDB_ARGS: '--data-checksums'
         volumes:
           - /mnt/storage/immich/db:/var/lib/postgresql/data
+        healthcheck:
+          test: pg_isready --dbname=immich --username=immich
+          interval: 5s
+          timeout: 5s
+          retries: 5
         networks:
           - media-network
 
-      # Immich Redis
-      immich-redis:
-        image: redis:7
-        container_name: immich-redis
+      # Immich server
+      immich:
+        image: ghcr.io/immich-app/immich-server:release
+        container_name: immich
         restart: unless-stopped
+        environment:
+          DB_HOSTNAME: immich-db
+          DB_USERNAME: immich
+          DB_PASSWORD: view_FRENCH_garden_CONTAIN
+          DB_DATABASE_NAME: immich
+          REDIS_HOSTNAME: immich-redis
+          UPLOAD_LOCATION: /usr/src/app/upload
+          JWT_SECRET: D1FeVpp1hKrTsjA0iR17GIZT0jHCWCdN+9Le2/BZR7eeqxHclqiJX6ufpgsanv2y
+          POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
+          NODE_ENV: production
+          LOG_LEVEL: verbose
+        volumes:
+          - /mnt/storage/immich/upload:/usr/src/app/upload
+          - /etc/localtime:/etc/localtime:ro
+        ports:
+          - "3001:3001"
+        depends_on:
+          immich-db:
+            condition: service_healthy
+          immich-redis:
+            condition: service_healthy
         networks:
           - media-network
   '';
