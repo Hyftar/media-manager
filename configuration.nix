@@ -264,9 +264,9 @@
         container_name: immich-server
         group_add:
           - immich
-        image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+        image: ghcr.io/immich-app/immich-server:''${IMMICH_VERSION:-release}
         volumes:
-          - ${UPLOAD_LOCATION}:/usr/src/app/upload
+          - ''${UPLOAD_LOCATION}:/usr/src/app/upload
           - /etc/localtime:/etc/localtime:ro
         env_file:
           - .immich-env
@@ -283,7 +283,7 @@
           container_name: immich-machine_learning
           group_add:
             - immich
-          image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+          image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
           volumes:
             - model-cache:/cache
           env_file:
@@ -307,13 +307,13 @@
             - immich
           image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
           environment:
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
-            POSTGRES_USER: ${DB_USERNAME}
-            POSTGRES_DB: ${DB_DATABASE_NAME}
+            POSTGRES_PASSWORD: ''${DB_PASSWORD}
+            POSTGRES_USER: ''${DB_USERNAME}
+            POSTGRES_DB: ''${DB_DATABASE_NAME}
             POSTGRES_INITDB_ARGS: '--data-checksums'
             DB_STORAGE_TYPE: 'HDD'
           volumes:
-            - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
+            - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
           restart: unless-stopped
 
       volumes:
