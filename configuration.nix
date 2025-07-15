@@ -89,7 +89,6 @@
       admin localhost:2019
       # Enable automatic HTTPS with Let's Encrypt
       email simonlandry762@gmail.com
-      auto_https on
     }
 
     # Emby subdomain

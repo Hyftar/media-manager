@@ -24,9 +24,6 @@
     modesetting.enable = true;
   };
 
-  # Add NVIDIA runtime for Docker containers (for hardware acceleration)
-  virtualisation.docker.enableNvidia = true;
-
   # Root file system
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";
