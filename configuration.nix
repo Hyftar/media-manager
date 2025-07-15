@@ -22,7 +22,8 @@
     chrootlocalUser = true;
 
     # SSL/TLS configuration
-    sslEnable = true;
+    forceLocalDataSSL = true;
+    forceLocalLoginsSSL = true;
 
     # FTP configuration
     extraConfig = ''
