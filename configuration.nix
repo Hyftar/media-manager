@@ -14,7 +14,6 @@
     };
   };
 
-  # Enable FTP server (vsftpd) with SSL/TLS using Let's Encrypt certificates
   services.vsftpd = {
     enable = true;
     writeEnable = true;
@@ -26,17 +25,8 @@
     anonymousUserNoPassword = false;
     chrootlocalUser = false;
 
-    # SSL/TLS configuration
-    forceLocalDataSSL = true;
-    forceLocalLoginsSSL = true;
-    rsaCertFile = "/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.crt";
-    rsaKeyFile = "/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.key";
-    # FTP configuration
     extraConfig = ''
-      ssl_enable=YES
-      force_local_data_ssl=YES
-      force_local_logins_ssl=YES
-      ssl_ciphers=HIGH
+      ssl_enable=NO
 
       # Passive mode settings
       pasv_enable=YES
@@ -53,12 +43,7 @@
 
       # Performance
       use_localtime=YES
-
       allow_writeable_chroot=YES
-
-      # Additional SSL settings
-      require_ssl_reuse=NO
-      ssl_request_cert=NO
     '';
   };
 
@@ -96,44 +81,6 @@
     "d /mnt/storage/caddy/config 0755 root root -"
     "d /var/lib/docker-compose 0755 root root -"
   ];
-
-  # Service to wait for Let's Encrypt certificates and restart vsftpd
-  systemd.services.vsftpd-cert-watcher = {
-    description = "Wait for Let's Encrypt certificates and restart vsftpd";
-    after = [ "caddy.service" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "simple";
-      Restart = "always";
-      RestartSec = "30";
-    };
-
-    script = ''
-      CERT_PATH="/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.crt"
-      KEY_PATH="/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.key"
-
-      while true; do
-        if [ -f "$CERT_PATH" ] && [ -f "$KEY_PATH" ]; then
-          echo "Let's Encrypt certificates found, restarting vsftpd..."
-          systemctl restart vsftpd.service
-
-          # Monitor for certificate renewals
-          while true; do
-            sleep 3600  # Check every hour
-            if [ "$CERT_PATH" -nt /var/lib/vsftpd.last_restart ] || [ "$KEY_PATH" -nt /var/lib/vsftpd.last_restart ]; then
-              echo "Certificate renewed, restarting vsftpd..."
-              systemctl restart vsftpd.service
-              touch /var/lib/vsftpd.last_restart
-            fi
-          done
-        else
-          echo "Waiting for Let's Encrypt certificates..."
-          sleep 30
-        fi
-      done
-    '';
-  };
 
   # Create Caddy configuration file
   environment.etc."caddy/Caddyfile".text = ''
