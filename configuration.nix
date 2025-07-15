@@ -348,6 +348,7 @@
   # Enable and start Docker service
   virtualisation.docker = {
     enable = true;
+    enableNvidia = true;
     enableOnBoot = true;
   };
 }
