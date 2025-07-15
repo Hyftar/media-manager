@@ -194,8 +194,9 @@
     }
   '';
 
-  # Immich .env file
-  environment.etc."docker-compose/.immich-env".text = ''
+  # Docker-compose .env file
+  environment.etc."docker-compose/.env".text = ''
+    # == Begin Immich config ==
     UPLOAD_LOCATION=/mnt/storage/immich/upload
     DB_DATA_LOCATION=/mnt/storage/immich/data
 
@@ -206,6 +207,7 @@
     # The values below this line do not need to be changed
     DB_USERNAME=postgres
     DB_DATABASE_NAME=immich
+    # == End Immich config ==
   '';
 
   # Create docker-compose configuration
@@ -232,7 +234,7 @@
           - media-network
         depends_on:
           - emby
-          - immich
+          - immich-server
 
       # Emby media server with NVIDIA GPU support
       emby:
@@ -269,7 +271,7 @@
           - ''${UPLOAD_LOCATION}:/usr/src/app/upload
           - /etc/localtime:/etc/localtime:ro
         env_file:
-          - /etc/docker-compose/.immich-env
+          - /etc/docker-compose/.env
         ports:
           - '2283:2283'
         depends_on:
@@ -279,45 +281,45 @@
         healthcheck:
           disable: false
 
-        immich-machine-learning:
-          container_name: immich-machine_learning
-          group_add:
-            - immich
-          image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
-          volumes:
-            - model-cache:/cache
-          env_file:
-            - /etc/docker-compose/.immich-env
-          restart: unless-stopped
-          healthcheck:
-            disable: false
+      immich-machine-learning:
+        container_name: immich-machine_learning
+        group_add:
+          - immich
+        image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
+        volumes:
+          - model-cache:/cache
+        env_file:
+          - /etc/docker-compose/.env
+        restart: unless-stopped
+        healthcheck:
+          disable: false
 
-        immich-redis:
-          container_name: immich-redis
-          group_add:
-            - immich
-          image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
-          healthcheck:
-            test: redis-cli ping || exit 1
-          restart: unless-stopped
+      immich-redis:
+        container_name: immich-redis
+        group_add:
+          - immich
+        image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
+        healthcheck:
+          test: redis-cli ping || exit 1
+        restart: unless-stopped
 
-        immich-database:
-          container_name: immich-postgres
-          group_add:
-            - immich
-          image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
-          environment:
-            POSTGRES_PASSWORD: ''${DB_PASSWORD}
-            POSTGRES_USER: ''${DB_USERNAME}
-            POSTGRES_DB: ''${DB_DATABASE_NAME}
-            POSTGRES_INITDB_ARGS: '--data-checksums'
-            DB_STORAGE_TYPE: 'HDD'
-          volumes:
-            - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
-          restart: unless-stopped
+      immich-database:
+        container_name: immich-postgres
+        group_add:
+          - immich
+        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+        environment:
+          POSTGRES_PASSWORD: ''${DB_PASSWORD}
+          POSTGRES_USER: ''${DB_USERNAME}
+          POSTGRES_DB: ''${DB_DATABASE_NAME}
+          POSTGRES_INITDB_ARGS: '--data-checksums'
+          DB_STORAGE_TYPE: 'HDD'
+        volumes:
+          - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
+        restart: unless-stopped
 
-      volumes:
-        model-cache:
+    volumes:
+      model-cache:
   '';
 
   # Systemd service to manage docker-compose (depends on certificates)
