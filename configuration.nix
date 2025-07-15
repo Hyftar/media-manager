@@ -9,7 +9,7 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = true;
+      PasswordAuthentication = false;
       PermitRootLogin = "no";
     };
   };
@@ -57,14 +57,62 @@
   };
 
   # Create hyftar user with SSH and FTP access
-  users.users.hyftar = {
-    isNormalUser = true;
-    description = "Simon Landry";
-    extraGroups = [ "wheel" "docker" "networkmanager" ];
-    home = "/mnt/storage/hyftar";
-    openssh.authorizedKeys.keys = [
-      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
-    ];
+  users = {
+    groups = {
+      media = {
+        gid = 2005;
+      };
+
+      photos = {
+        gid = 2006;
+      };
+
+      immich = {
+        gid = 2007;
+      };
+    };
+
+    users = {
+      hyftar = {
+        isNormalUser = true;
+        description = "Simon Landry";
+        extraGroups = [ "wheel" "docker" "networkmanager" ];
+        home = "/mnt/storage/hyftar";
+        openssh.authorizedKeys.keys = [
+          "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
+        ];
+      };
+
+      emby = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Emby user";
+        group = "emby";
+        extraGroups = [ "media" ];
+        uid = 900;
+      };
+
+      immich = {
+        description = "Immich user";
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        group = "immich";
+        extraGroups = [ "photos" ];
+        uid = 901;
+      };
+
+      caddy = {
+        description = "Caddy user";
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        group = "caddy";
+        extraGroups = [ ];
+        uid = 902;
+      }
+    };
   };
 
   # Enable systemd for managing services
@@ -74,11 +122,17 @@
 
   # Create necessary directories and set permissions
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/emby 0755 root root -"
-    "d /mnt/storage/immich 0755 root root -"
-    "d /mnt/storage/caddy 0755 root root -"
-    "d /mnt/storage/caddy/data 0755 root root -"
-    "d /mnt/storage/caddy/config 0755 root root -"
+    "d /mnt/storage/emby 0755 emby emby -"
+    "d /mnt/storage/series 0775 hyftar media -"
+    "Z /mnt/storage/series 0775 hyftar media -" # Recursively set permissions
+    "d /mnt/storage/movies 0775 hyftar media -"
+    "Z /mnt/storage/movies 0775 hyftar media -"
+    "d /mnt/storage/animes 0775 hyftar media -"
+    "Z /mnt/storage/animes 0775 hyftar media -"
+    "d /mnt/storage/immich 0755 immich immich -"
+    "Z /mnt/storage/immich 0755 immich immich -"
+    "d /mnt/storage/caddy 0755 caddy caddy -"
+    "Z /mnt/storage/caddy 0755 caddy caddy -"
     "d /var/lib/docker-compose 0755 root root -"
   ];
 
@@ -163,9 +217,9 @@
         container_name: emby
         restart: unless-stopped
         environment:
-          - UID=1000
-          - GID=1000
-          - GIDLIST=1000
+          - UID=900
+          - GID=2005
+          - GIDLIST=2005
           - NVIDIA_VISIBLE_DEVICES=all
           - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
         volumes:
@@ -174,7 +228,8 @@
           - /mnt/storage/series:/media/series
           - /mnt/storage/animes:/media/animes
         ports:
-          - "8096:8096"  # Emby web interface
+          - 8096:8096
+          - 8920:8920
         devices:
           - /dev/dri:/dev/dri  # For hardware acceleration
         runtime: nvidia
