@@ -35,7 +35,7 @@
 
   # Media HDD
   fileSystems."/mnt/storage" = {
-    device = "/dev/disk/by-uuid/df617c43-0dd9-4c39-9143-830fbb1d8547";
+    device = "/dev/disk/by-uuid/df617e43-0dd9-4c39-9143-830fbb1d0547";
     fsType = "ext4";
     options = [ "defaults" "nofail" ];
   };

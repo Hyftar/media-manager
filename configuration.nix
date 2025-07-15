@@ -2,8 +2,7 @@
 {
   boot.loader.grub = {
     enable = true;
-    version = 2;
-    devices = [ "/dev/disk/by-label/EFIBOOT" ];
+    devices = [ "/dev/disk/by-partlabel/BOOT" ];
   };
 
   # Enable SSH
