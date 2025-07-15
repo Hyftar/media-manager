@@ -282,6 +282,7 @@
     description = "Media Server Docker Compose";
     after = [ "docker.service" "network-online.target" "vsftpd-cert-watcher.service" ];
     wants = [ "network-online.target" ];
+    requires = [ "docker.service" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
@@ -291,7 +292,7 @@
       ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -d";
       ExecStop = "${pkgs.docker-compose}/bin/docker-compose down";
       ExecReload = "${pkgs.docker-compose}/bin/docker-compose restart";
-      TimeoutStartSec = 0;
+      TimeoutStartSec = 300;
     };
 
     environment = {
@@ -313,6 +314,8 @@
   ];
 
   # Enable and start Docker service
-  systemd.services.docker.enable = true;
-  systemd.services.docker.wantedBy = [ "multi-user.target" ];
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+  };
 }
