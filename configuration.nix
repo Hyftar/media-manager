@@ -269,7 +269,7 @@
           - ''${UPLOAD_LOCATION}:/usr/src/app/upload
           - /etc/localtime:/etc/localtime:ro
         env_file:
-          - .immich-env
+          - /etc/docker-compose/.immich-env
         ports:
           - '2283:2283'
         depends_on:
@@ -287,7 +287,7 @@
           volumes:
             - model-cache:/cache
           env_file:
-            - .immich-env
+            - /etc/docker-compose/.immich-env
           restart: unless-stopped
           healthcheck:
             disable: false
