@@ -170,22 +170,7 @@
 
     # Immich subdomain
     photos.grosluxe.ca {
-      reverse_proxy immich:2283
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
-    }
-
-    # FTP over HTTPS subdomain
-    ftp.grosluxe.ca {
-      file_server browse {
-        root /mnt/storage
-      }
-
+      reverse_proxy immich-server:2283
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
