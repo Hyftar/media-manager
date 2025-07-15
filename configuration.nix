@@ -138,8 +138,8 @@
     "d /mnt/storage/animes 0775 hyftar media -"
     "Z /mnt/storage/animes 0775 hyftar media -"
     "d /mnt/storage/immich 0755 immich immich -"
-    "Z /mnt/storage/immich 0755 immich immich -"
-    "d /mnt/storage/immich/db 0755 999 999 -" # PostgreSQL runs as uid 999 in container
+    "d /mnt/storage/immich/upload 0755 immich immich -"
+    "d /mnt/storage/immich/db 0755 immich immich -"
     "d /mnt/storage/caddy 0755 caddy caddy -"
     "Z /mnt/storage/caddy 0755 caddy caddy -"
     "d /var/lib/docker-compose 0755 root root -"
@@ -260,6 +260,7 @@
         image: postgres:15-alpine
         container_name: immich-db
         restart: unless-stopped
+        user: immich
         environment:
           POSTGRES_USER: immich
           POSTGRES_PASSWORD: view_FRENCH_garden_CONTAIN
