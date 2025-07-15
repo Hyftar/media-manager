@@ -24,10 +24,10 @@
     # SSL/TLS configuration
     forceLocalDataSSL = true;
     forceLocalLoginsSSL = true;
-
+    rsaCertFile = "/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.crt";
+    rsaKeyFile = "/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.key";
     # FTP configuration
     extraConfig = ''
-      # SSL/TLS settings using Let's Encrypt certificates from Caddy
       ssl_enable=YES
       allow_anon_ssl=NO
       force_local_data_ssl=YES
@@ -36,8 +36,6 @@
       ssl_sslv2=NO
       ssl_sslv3=NO
       ssl_ciphers=HIGH
-      rsa_cert_file=/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.crt
-      rsa_private_key_file=/mnt/storage/caddy/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory/ftp.grosluxe.ca/ftp.grosluxe.ca.key
 
       # Passive mode settings
       pasv_enable=YES
@@ -156,7 +154,7 @@
     {
       admin localhost:2019
       # Enable automatic HTTPS with Let's Encrypt
-      email simonlandry762@gmail.com  # Replace with your email
+      email simonlandry762@gmail.com
       auto_https on
     }
 

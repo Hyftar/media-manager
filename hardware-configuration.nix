@@ -32,10 +32,14 @@
 
 
   # Media HDD
-  # Commented out for now -- testing
-  # fileSystems."/mnt/storage" = {
-  #   device = "/dev/sdb1";
-  #   fsType = "ext4";
-  #   options = [ "defaults" "nofail" "user" "exec" ];
-  # };
+  fileSsystems."/" = {
+    device = "/dev/sda1";
+    fsType = "ext4";
+  }
+
+  fileSystems."/mnt/storage" = {
+    device = "/dev/sdb1";
+    fsType = "ext4";
+    options = [ "defaults" "nofail" ];
+  };
 }
