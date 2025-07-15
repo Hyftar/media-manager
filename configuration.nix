@@ -175,13 +175,7 @@
           - "8096:8096"  # Emby web interface
         devices:
           - /dev/dri:/dev/dri  # For hardware acceleration
-        deploy:
-          resources:
-            reservations:
-              devices:
-                - driver: nvidia
-                  count: 1
-                  capabilities: [gpu]
+        runtime: nvidia
         networks:
           - media-network
 

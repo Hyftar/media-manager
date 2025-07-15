@@ -5,9 +5,9 @@
 
   # NVIDIA GTX 570 Graphics Configuration
   services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia-container-toolkit.enable = true; # Enable container toolkit for Docker
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
+  # hardware.nvidia-container-toolkit.enable = true; # newer config, not supported with legacy cards
 
   # Configure NVIDIA driver for GTX 570 (legacy card)
   hardware.nvidia = {
@@ -23,6 +23,9 @@
 
     modesetting.enable = true;
   };
+
+  # NVIDIA Docker Configuration (deprecated but only option for legacy cards)
+  virtualisation.docker.enableNvidia = true;
 
   # Root file system
   fileSystems."/" = {
