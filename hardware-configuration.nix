@@ -6,11 +6,7 @@
 
   # NVIDIA GTX 570 Graphics Configuration
   services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-    driSupport32Bit = true;
-  };
+  hardware.opengl.enable = true;
 
   # Configure NVIDIA driver for GTX 570 (legacy card)
   hardware.nvidia = {
