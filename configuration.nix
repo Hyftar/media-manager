@@ -2,7 +2,8 @@
 {
   boot.loader.grub = {
     enable = true;
-    devices = [ "/dev/sda" ];
+    version = 2;
+    devices = [ "/dev/disk/by-label/EFIBOOT" ];
   };
 
   # Enable SSH
@@ -24,7 +25,7 @@
     userlistDeny = false;
     anonymousUser = false;
     anonymousUserNoPassword = false;
-    chrootlocalUser = true;
+    chrootlocalUser = false;
 
     # SSL/TLS configuration
     forceLocalDataSSL = true;
@@ -34,12 +35,8 @@
     # FTP configuration
     extraConfig = ''
       ssl_enable=YES
-      allow_anon_ssl=NO
       force_local_data_ssl=YES
       force_local_logins_ssl=YES
-      ssl_tlsv1=YES
-      ssl_sslv2=NO
-      ssl_sslv3=NO
       ssl_ciphers=HIGH
 
       # Passive mode settings
@@ -48,8 +45,6 @@
       pasv_max_port=50100
 
       # User settings
-      local_enable=YES
-      write_enable=YES
       local_umask=022
       dirmessage_enable=YES
 
@@ -60,14 +55,7 @@
       # Performance
       use_localtime=YES
 
-      # Prevent users from leaving their home directory
-      chroot_local_user=YES
       allow_writeable_chroot=YES
-
-      # User list settings
-      userlist_enable=YES
-      userlist_file=/etc/vsftpd.userlist
-      userlist_deny=NO
 
       # Additional SSL settings
       require_ssl_reuse=NO
@@ -89,7 +77,7 @@
     isNormalUser = true;
     description = "Simon Landry";
     extraGroups = [ "wheel" "docker" "networkmanager" ];
-    home = "/home/hyftar";
+    home = "/mnt/storage/hyftar";
     openssh.authorizedKeys.keys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
     ];
@@ -109,11 +97,6 @@
     "d /mnt/storage/caddy/config 0755 root root -"
     "d /var/lib/docker-compose 0755 root root -"
   ];
-
-  # Create FTP user list
-  environment.etc."vsftpd.userlist".text = ''
-    hyftar
-  '';
 
   # Service to wait for Let's Encrypt certificates and restart vsftpd
   systemd.services.vsftpd-cert-watcher = {
@@ -205,8 +188,6 @@
 
   # Create docker-compose configuration
   environment.etc."docker-compose/docker-compose.yml".text = ''
-    version: '3.8'
-
     networks:
       media-network:
         driver: bridge
@@ -328,6 +309,7 @@
     curl
     wget
     nvidia-docker
+    neovim
   ];
 
   # Enable and start Docker service

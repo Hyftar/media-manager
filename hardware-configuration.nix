@@ -29,13 +29,13 @@
 
   # Root file system
   fileSystems."/" = {
-    device = "/dev/sda2";
+    device = "/dev/disk/by-label/nixos";
     fsType = "ext4";
   };
 
   # Media HDD
   fileSystems."/mnt/storage" = {
-    device = "/dev/sdb1";
+    device = "/dev/disk/by-uuid/df617c43-0dd9-4c39-9143-830fbb1d8547";
     fsType = "ext4";
     options = [ "defaults" "nofail" ];
   };
