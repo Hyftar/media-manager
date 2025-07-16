@@ -342,6 +342,7 @@
     wget
     nvidia-docker
     neovim
+    libva-utils
     git
   ];
 
