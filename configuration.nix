@@ -1,5 +1,7 @@
 { config, pkgs, ... }:
 {
+  system.stateVersion = "25.05";
+
   boot.loader.grub = {
     enable = true;
     devices = [ "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292" ];
