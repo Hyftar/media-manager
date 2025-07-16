@@ -242,6 +242,8 @@
         ports:
           - 8096:8096
           - 8920:8920
+        devices:
+          - /dev/dri:/dev/dri
         runtime: nvidia
         networks:
           - media-network
