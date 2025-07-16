@@ -9,6 +9,10 @@
   hardware.graphics.enable32Bit = true;
   hardware.nvidia-container-toolkit.enable = true;
 
+  hardware.graphics.extraPackages = with pkgs; [
+    nvidia-vaapi-driver
+  ];
+
   # Configure NVIDIA driver for GTX 750 Ti
   hardware.nvidia = {
     package = config.boot.kernelPackages.nvidiaPackages.production;
