@@ -258,6 +258,7 @@
         image: ghcr.io/immich-app/immich-server:''${IMMICH_VERSION:-release}
         volumes:
           - ''${UPLOAD_LOCATION}:/usr/src/app/upload
+          - /mnt/storage/pictures:/mnt/storage/pictures
           - /etc/localtime:/etc/localtime:ro
         env_file:
           - /etc/docker-compose/.env

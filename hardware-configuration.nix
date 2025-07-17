@@ -27,6 +27,7 @@
 
     modesetting.enable = true;
   };
+
   # Root file system
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";
