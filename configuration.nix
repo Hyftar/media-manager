@@ -172,7 +172,7 @@
 
     # Immich subdomain
     photos.grosluxe.ca {
-      reverse_proxy immich-server:2283
+      reverse_proxy immich_server:2283
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
