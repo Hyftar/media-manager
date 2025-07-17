@@ -268,6 +268,8 @@
           - redis
           - database
         restart: unless-stopped
+        networks:
+          - media-network
         healthcheck:
           disable: false
 
@@ -281,6 +283,8 @@
         env_file:
           - /etc/docker-compose/.env
         restart: unless-stopped
+        networks:
+          - media-network
         healthcheck:
           disable: false
 
@@ -291,6 +295,8 @@
         image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
         healthcheck:
           test: redis-cli ping || exit 1
+        networks:
+          - media-network
         restart: unless-stopped
 
       database:
@@ -306,6 +312,8 @@
           DB_STORAGE_TYPE: 'HDD'
         volumes:
           - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
+        networks:
+          - media-network
         restart: unless-stopped
 
     volumes:
