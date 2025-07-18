@@ -421,7 +421,7 @@
           - DELUGE_LOGLEVEL=error
         volumes:
           - /mnt/storage/deluge:/config
-          - /mnt/storage/media/torrents:/downloads
+          - /mnt/storage/media/torrents:/media/torrents
         ports:
           - 8112:8112
           - 6881:6881
