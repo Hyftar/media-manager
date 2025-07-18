@@ -54,7 +54,8 @@
   # Add SSH and FTP ports to firewall
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 21 22 80 443 ];
+    allowedUDPPorts = [ 6881 ];
+    allowedTCPPorts = [ 21 22 80 443 6881 58846 ];
     allowedTCPPortRanges = [
       { from = 50000; to = 50100; }  # FTP passive mode port range
     ];
@@ -232,6 +233,17 @@
         Referrer-Policy "strict-origin-when-cross-origin"
       }
     }
+
+    deluge.grosluxe.ca {
+      reverse_proxy deluge:8112
+      header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+      }
+    }
   '';
 
   # Docker-compose .env file
@@ -398,14 +410,22 @@
         restart: unless-stopped
 
       deluge:
-        image: binhex/arch-delugevpn
-        volumes:
-          - /mnt/storage/deluge:/config
-          - /mnt/storage/media/torrents:/media/torrents
+        image: lscr.io/linuxserver/deluge:latest
+        container_name: deluge
         environment:
           - PUID=905
           - PGID=2005
-          - UMASK=002
+          - TZ=America/Toronto
+          - DELUGE_LOGLEVEL=error
+        volumes:
+          - /mnt/storage/deluge:/config
+          - /mnt/storage/media/torrents:/downloads
+        ports:
+          - 8112:8112
+          - 6881:6881
+          - 6881:6881/udp
+          - 58846:58846
+        restart: unless-stopped
 
     volumes:
       model-cache:
