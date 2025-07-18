@@ -401,7 +401,7 @@
         environment:
           - PUID=904
           - PGID=2005
-          - TZ=Etc/UTC
+          - TZ=America/Toronto
         volumes:
           - /mnt/storage/radarr:/config
           - /mnt/storage/media:/media
@@ -430,6 +430,23 @@
         networks:
           - media-network
         restart: unless-stopped
+
+    jackett:
+      image: lscr.io/linuxserver/jackett:latest
+      container_name: jackett
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=America/Toronto
+        - AUTO_UPDATE=true
+      volumes:
+        - /mnt/storage/jackett:/config
+        - /mnt/storage/media/torrents:/downloads
+      ports:
+        - 9117:9117
+      networks:
+        - media-network
+      restart: unless-stopped
 
     volumes:
       model-cache:
