@@ -124,6 +124,33 @@
         extraGroups = [ ];
         uid = 902;
       };
+
+      sonarr = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Sonarr user";
+        group = "media";
+        uid = 903;
+      };
+
+      radarr = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Radarr user";
+        group = "media";
+        uid = 904;
+      };
+
+      deluge = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Deluge user";
+        group = "media";
+        uid = 905;
+      };
     };
   };
 
@@ -135,17 +162,21 @@
   # Create necessary directories and set permissions
   systemd.tmpfiles.rules = [
     "d /mnt/storage/emby 0755 emby emby -"
-    "d /mnt/storage/series 0775 hyftar media -"
-    "Z /mnt/storage/series 0775 hyftar media -" # Recursively set permissions
-    "d /mnt/storage/movies 0775 hyftar media -"
-    "Z /mnt/storage/movies 0775 hyftar media -"
-    "d /mnt/storage/animes 0775 hyftar media -"
-    "Z /mnt/storage/animes 0775 hyftar media -"
+    "d /mnt/storage/deluge 0755 deluge media -"
+    "d /mnt/storage/media/series 0775 hyftar media -"
+    "d /mnt/storage/media/movies 0775 hyftar media -"
+    "d /mnt/storage/media/animes 0775 hyftar media -"
+    "d /mnt/storage/media/torrents 0775 hyftar media -"
+    "Z /mnt/storage/media/ 0775 hyftar media -" # Recursively set permissions
     "d /mnt/storage/immich 0775 immich immich -"
     "d /mnt/storage/immich/upload 0775 immich immich -"
     "d /mnt/storage/immich/data 0775 immich immich -"
     "d /mnt/storage/caddy 0775 caddy caddy -"
     "Z /mnt/storage/caddy 0775 caddy caddy -"
+    "d /mnt/storage/sonarr 0775 sonarr media -"
+    "Z /mnt/storage/sonarr 0775 sonarr media -"
+    "d /mnt/storage/radarr 0775 radarr media -"
+    "Z /mnt/storage/radarr 0775 radarr media -"
     "d /var/lib/docker-compose 0755 root root -"
   ];
 
@@ -158,7 +189,6 @@
       email simonlandry762@gmail.com
     }
 
-    # Emby subdomain
     emby.grosluxe.ca {
       reverse_proxy emby:8096
       header {
@@ -170,9 +200,30 @@
       }
     }
 
-    # Immich subdomain
     photos.grosluxe.ca {
       reverse_proxy immich_server:2283
+      header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+      }
+    }
+
+    sonarr.grosluxe.ca {
+      reverse_proxy sonarr:8989
+      header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+      }
+    }
+
+    radarr.grosluxe.ca {
+      reverse_proxy radarr:7878
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -238,9 +289,9 @@
           - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
         volumes:
           - /mnt/storage/emby/config:/config
-          - /mnt/storage/movies:/media/movies
-          - /mnt/storage/series:/media/series
-          - /mnt/storage/animes:/media/animes
+          - /mnt/storage/media/movies:/media/movies
+          - /mnt/storage/media/series:/media/series
+          - /mnt/storage/media/animes:/media/animes
         ports:
           - 8096:8096
           - 8920:8920
@@ -316,6 +367,46 @@
           - media-network
         restart: unless-stopped
 
+      sonarr:
+        image: lscr.io/linuxserver/sonarr:latest
+        container_name: sonarr
+        environment:
+          - PUID=903
+          - PGID=2005
+          - TZ=America/Toronto
+        volumes:
+          - /mnt/storage/sonarr:/config
+          - /mnt/storage/media:/media
+        ports:
+          - 8989:8989
+        networks:
+          - media-network
+        restart: unless-stopped
+
+      radarr:
+        image: lscr.io/linuxserver/radarr:latest
+        container_name: radarr
+        environment:
+          - PUID=904
+          - PGID=2005
+          - TZ=Etc/UTC
+        volumes:
+          - /mnt/storage/radarr:/config
+          - /mnt/storage/media:/media
+        ports:
+          - 7878:7878
+        restart: unless-stopped
+
+      deluge:
+        image: binhex/arch-delugevpn
+        volumes:
+          - /mnt/storage/deluge:/config
+          - /mnt/storage/media/torrents:/media/torrents
+        environment:
+          - PUID=905
+          - PGID=2005
+          - UMASK=002
+
     volumes:
       model-cache:
   '';
@@ -323,7 +414,7 @@
   # Systemd service to manage docker-compose (depends on certificates)
   systemd.services.media-server = {
     description = "Media Server Docker Compose";
-    after = [ "docker.service" "network-online.target" "vsftpd-cert-watcher.service" ];
+    after = [ "docker.service" "network-online.target" ];
     wants = [ "network-online.target" ];
     requires = [ "docker.service" ];
     wantedBy = [ "multi-user.target" ];
