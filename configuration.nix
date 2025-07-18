@@ -407,6 +407,8 @@
           - /mnt/storage/media:/media
         ports:
           - 7878:7878
+        networks:
+          - media-network
         restart: unless-stopped
 
       deluge:
@@ -425,6 +427,8 @@
           - 6881:6881
           - 6881:6881/udp
           - 58846:58846
+        networks:
+          - media-network
         restart: unless-stopped
 
     volumes:
