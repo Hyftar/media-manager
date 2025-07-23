@@ -18,50 +18,16 @@
     };
   };
 
-  services.vsftpd = {
-    enable = true;
-    writeEnable = true;
-    localUsers = true;
-    userlist = [ "hyftar" ];
-    userlistEnable = true;
-    userlistDeny = false;
-    anonymousUser = false;
-    anonymousUserNoPassword = false;
-    chrootlocalUser = false;
-
-    extraConfig = ''
-      ssl_enable=NO
-
-      # Passive mode settings
-      pasv_enable=YES
-      pasv_min_port=50000
-      pasv_max_port=50100
-
-      # User settings
-      local_umask=022
-      dirmessage_enable=YES
-
-      # Logging
-      xferlog_enable=YES
-      connect_from_port_20=YES
-
-      # Performance
-      use_localtime=YES
-      allow_writeable_chroot=YES
-    '';
-  };
-
   # Add SSH and FTP ports to firewall
   networking.firewall = {
     enable = true;
     allowedUDPPorts = [ 6881 ];
-    allowedTCPPorts = [ 21 22 80 443 6881 58846 ];
+    allowedTCPPorts = [ 22 80 443 6881 58846 ];
     allowedTCPPortRanges = [
       { from = 50000; to = 50100; }  # FTP passive mode port range
     ];
   };
 
-  # Create hyftar user with SSH and FTP access
   users = {
     groups = {
       media = {
@@ -477,6 +443,8 @@
 
   # Install required packages
   environment.systemPackages = with pkgs; [
+    borgbackup
+    parted
     docker
     docker-compose
     openssl
