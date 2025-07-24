@@ -487,6 +487,7 @@
           owner = "NVIDIA";
           repo = "nvidia-container-toolkit";
           rev = "v1.17.6";
+          sha256 = "sha256-MQQTQ6AaoA4VIAT7YPo3z6UbZuKHjOvu9sW2975TveM=";
         };
       });
     };
