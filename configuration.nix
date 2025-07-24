@@ -487,7 +487,7 @@
           owner = "NVIDIA";
           repo = "nvidia-container-toolkit";
           rev = "v1.17.8"; # match the version
-          sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # you'll need to get the correct hash
+          sha256 = "sha256-B17cPxdrQ8qMNgFh4XcDwwKryukMrn0GV2LNPHM7kBo="; # you'll need to get the correct hash
         };
       });
     };
