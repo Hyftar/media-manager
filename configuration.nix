@@ -75,10 +75,6 @@
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID5HeefY97S3ZZS5qpZXHjSZgyuqFj+vgq8nMInzPds1"
         ];
-
-        openssh.authorizedKeys.keyFiles = [
-          ".ssh/authorized_keys"
-        ];
       };
 
       emby = {
