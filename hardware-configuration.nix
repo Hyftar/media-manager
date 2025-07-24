@@ -15,7 +15,9 @@
 
   # Configure NVIDIA driver for GTX 750 Ti
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    package = config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (oldAttrs: {
+      version = "570.153.02";
+    });
 
     nvidiaSettings = false;
 
