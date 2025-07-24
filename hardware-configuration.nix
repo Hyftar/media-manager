@@ -43,7 +43,7 @@
     };
 
     "/mnt/bark_backup" = {
-      device = "/dev/disk/by-label/bark_backup";
+      device = "/dev/disk/by-partlabel/bark_backup";
       fsType = "ext4";
       options = [ "defaults" "nofail" ];
     };
