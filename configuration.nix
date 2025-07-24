@@ -90,7 +90,7 @@
         ];
 
         openssh.authorizedKeys.keyFiles = [
-          "/mnt/bark_backup/.ssh/authorisedKeys"
+          "~/.ssh/authorisedKeys"
         ];
       };
 
