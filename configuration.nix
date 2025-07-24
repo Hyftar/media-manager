@@ -90,7 +90,7 @@
         ];
 
         openssh.authorizedKeys.keyFiles = [
-          "~/.ssh/authorisedKeys"
+          ".ssh/authorized_keys"
         ];
       };
 
