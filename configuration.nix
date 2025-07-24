@@ -151,23 +151,23 @@
 
   # Create necessary directories and set permissions
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/emby 0755 emby emby -"
-    "d /mnt/storage/deluge 0755 deluge media -"
-    "d /mnt/storage/media/series 0775 hyftar media -"
-    "d /mnt/storage/media/movies 0775 hyftar media -"
-    "d /mnt/storage/media/animes 0775 hyftar media -"
-    "d /mnt/storage/media/torrents 0775 hyftar media -"
-    "Z /mnt/storage/media/ 0775 hyftar media -" # Recursively set permissions
-    "d /mnt/storage/immich 0775 immich immich -"
-    "d /mnt/storage/immich/upload 0775 immich immich -"
-    "d /mnt/storage/immich/data 0775 immich immich -"
-    "d /mnt/storage/caddy 0775 caddy caddy -"
-    "Z /mnt/storage/caddy 0775 caddy caddy -"
-    "d /mnt/storage/sonarr 0775 sonarr media -"
-    "Z /mnt/storage/sonarr 0775 sonarr media -"
-    "d /mnt/storage/radarr 0775 radarr media -"
-    "Z /mnt/storage/radarr 0775 radarr media -"
-    "d /var/lib/docker-compose 0755 root root -"
+    "d /mnt/storage/emby 0750 emby emby -"
+    "d /mnt/storage/deluge 0750 deluge media -"
+    "d /mnt/storage/media/series 0770 hyftar media -"
+    "d /mnt/storage/media/movies 0770 hyftar media -"
+    "d /mnt/storage/media/animes 0770 hyftar media -"
+    "d /mnt/storage/media/torrents 0770 hyftar media -"
+    "Z /mnt/storage/media/ 0770 hyftar media -" # Recursively set permissions
+    "d /mnt/storage/immich 0770 immich immich -"
+    "d /mnt/storage/immich/upload 0770 immich immich -"
+    "d /mnt/storage/immich/data 0770 immich immich -"
+    "d /mnt/storage/caddy 0770 caddy caddy -"
+    "Z /mnt/storage/caddy 0770 caddy caddy -"
+    "d /mnt/storage/sonarr 0770 sonarr media -"
+    "Z /mnt/storage/sonarr 0770 sonarr media -"
+    "d /mnt/storage/radarr 0770 radarr media -"
+    "Z /mnt/storage/radarr 0770 radarr media -"
+    "d /var/lib/docker-compose 0750 root root -"
   ];
 
   # Create Caddy configuration file
