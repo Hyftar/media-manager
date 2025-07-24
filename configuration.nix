@@ -62,6 +62,26 @@
         ];
       };
 
+      bark = {
+        isNormalUser = true;
+        isSystemUser = false;
+        createHome = false;
+        description = "Bark Barré";
+        home = "/mnt/bark_backup";
+      };
+
+      security.sudo.extraRules = [
+        {
+          users = [ "bark" ];
+          commands = [
+            {
+              command = "${pkgs.borgbackup}/bin/borg";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }
+      ];
+
       emby = {
         isSystemUser = true;
         isNormalUser = false;

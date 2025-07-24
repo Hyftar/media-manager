@@ -29,15 +29,23 @@
   };
 
   # Root file system
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-  };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-label/nixos";
+      fsType = "ext4";
+    };
 
-  # Media HDD
-  fileSystems."/mnt/storage" = {
-    device = "/dev/disk/by-uuid/df617e43-0dd9-4c39-9143-830fbb1d0547";
-    fsType = "ext4";
-    options = [ "defaults" "nofail" ];
+    # Media HDD
+    "/mnt/storage" = {
+      device = "/dev/disk/by-uuid/df617e43-0dd9-4c39-9143-830fbb1d0547";
+      fsType = "ext4";
+      options = [ "defaults" "nofail" ];
+    };
+
+    "/mnt/bark_backup" = {
+      device = "/dev/disk/by-label/bark_backup";
+      fsType = "ext4";
+      options = [ "defaults" "nofail" ];
+    };
   };
 }
