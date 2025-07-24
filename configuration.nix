@@ -28,18 +28,6 @@
     ];
   };
 
-  security.sudo.extraRules = [
-    {
-      users = [ "bark" ];
-      commands = [
-        {
-          command = "${pkgs.borgbackup}/bin/borg";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
-
   users = {
     groups = {
       bark = {
@@ -80,10 +68,9 @@
 
       bark = {
         isNormalUser = true;
-        isSystemUser = false;
-        createHome = false;
+        createHome = true;
         description = "Bark Barré";
-        home = "/mnt/bark_backup";
+        home = "/mnt/bark_backup/bark";
         group = "bark";
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID5HeefY97S3ZZS5qpZXHjSZgyuqFj+vgq8nMInzPds1"
