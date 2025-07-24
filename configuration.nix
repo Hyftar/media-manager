@@ -480,5 +480,17 @@
     enableOnBoot = true;
   };
 
+  nixpkgs.config.packageOverrides = pkgs: {
+      nvidia-container-toolkit = pkgs.nvidia-container-toolkit.overrideAttrs (oldAttrs: {
+        version = "1.17.8"; # specify your desired version
+        src = pkgs.fetchFromGitHub {
+          owner = "NVIDIA";
+          repo = "nvidia-container-toolkit";
+          rev = "v1.17.8"; # match the version
+          sha256 = "f202b80a9b9d0db00d9b1d73c0128c8962c55f4d"; # you'll need to get the correct hash
+        };
+      });
+    };
+
   nix.settings.download-buffer-size = 1024 * 1024 * 1024; # 1GB buffer size
 }
