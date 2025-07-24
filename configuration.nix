@@ -15,6 +15,7 @@
     settings = {
       PasswordAuthentication = false;
       PermitRootLogin = "no";
+      StrictModes = false;
     };
   };
 
