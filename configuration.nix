@@ -482,12 +482,11 @@
 
   nixpkgs.config.packageOverrides = pkgs: {
       nvidia-container-toolkit = pkgs.nvidia-container-toolkit.overrideAttrs (oldAttrs: {
-        version = "1.17.8"; # specify your desired version
+        version = "1.17.6"; # specify your desired version
         src = pkgs.fetchFromGitHub {
           owner = "NVIDIA";
           repo = "nvidia-container-toolkit";
-          rev = "v1.17.8"; # match the version
-          sha256 = "sha256-B17cPxdrQ8qMNgFh4XcDwwKryukMrn0GV2LNPHM7kBo="; # you'll need to get the correct hash
+          rev = "v1.17.6";
         };
       });
     };
