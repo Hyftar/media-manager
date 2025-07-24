@@ -42,6 +42,10 @@
 
   users = {
     groups = {
+      bark = {
+        gid = 420;
+      };
+
       media = {
         gid = 2005;
       };
@@ -80,6 +84,7 @@
         createHome = false;
         description = "Bark Barré";
         home = "/mnt/bark_backup";
+        group = "bark";
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID5HeefY97S3ZZS5qpZXHjSZgyuqFj+vgq8nMInzPds1"
         ];
@@ -167,6 +172,7 @@
     "Z /mnt/storage/sonarr 0770 sonarr media -"
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
+    "Z /mnt/bark_backup 0770 bark bark -"
     "d /var/lib/docker-compose 0750 root root -"
   ];
 
