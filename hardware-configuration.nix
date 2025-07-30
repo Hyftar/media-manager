@@ -49,5 +49,11 @@
       fsType = "ext4";
       options = [ "defaults" "nofail" ];
     };
+
+    "/mnt/media" = {
+      device = "/dev/disk/by-partlabel/media";
+      fsType = "ext4";
+      options = [ "defaults" "nofail" ];
+    };
   };
 }
