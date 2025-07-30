@@ -144,16 +144,16 @@
 
   # Create necessary directories and set permissions
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/emby 0750 emby emby -"
-    "d /mnt/storage/deluge 0750 deluge media -"
-    "d /mnt/storage/media/series 0770 hyftar media -"
-    "d /mnt/storage/media/movies 0770 hyftar media -"
-    "d /mnt/storage/media/animes 0770 hyftar media -"
-    "d /mnt/storage/media/torrents 0770 hyftar media -"
-    "Z /mnt/storage/media/ 0770 hyftar media -" # Recursively set permissions
+    "d /mnt/media/series 0770 hyftar media -"
+    "d /mnt/media/movies 0770 hyftar media -"
+    "d /mnt/media/animes 0770 hyftar media -"
+    "d /mnt/media/torrents 0770 hyftar media -"
+    "Z /mnt/media/ 0770 hyftar media -" # Recursively set permissions
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
+    "d /mnt/storage/emby 0750 emby emby -"
+    "d /mnt/storage/deluge 0750 deluge media -"
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
     "d /mnt/storage/sonarr 0770 sonarr media -"
@@ -264,7 +264,6 @@
           - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
           - /mnt/storage/caddy/data:/data
           - /mnt/storage/caddy/config:/config
-          - /mnt/storage:/mnt/storage:ro  # Mount storage for file server
         networks:
           - media-network
         depends_on:
@@ -284,9 +283,9 @@
           - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
         volumes:
           - /mnt/storage/emby/config:/config
-          - /mnt/storage/media/movies:/media/movies
-          - /mnt/storage/media/series:/media/series
-          - /mnt/storage/media/animes:/media/animes
+          - /mnt/media/movies:/media/movies
+          - /mnt/media/series:/media/series
+          - /mnt/media/animes:/media/animes
         ports:
           - 8096:8096
           - 8920:8920
@@ -371,7 +370,7 @@
           - TZ=America/Toronto
         volumes:
           - /mnt/storage/sonarr:/config
-          - /mnt/storage/media:/media
+          - /mnt/media:/media
         ports:
           - 8989:8989
         networks:
@@ -387,7 +386,7 @@
           - TZ=America/Toronto
         volumes:
           - /mnt/storage/radarr:/config
-          - /mnt/storage/media:/media
+          - /mnt/media:/media
         ports:
           - 7878:7878
         networks:
@@ -404,7 +403,7 @@
           - DELUGE_LOGLEVEL=error
         volumes:
           - /mnt/storage/deluge:/config
-          - /mnt/storage/media/torrents:/media/torrents
+          - /mnt/media/torrents:/media/torrents
         ports:
           - 8112:8112
           - 6881:6881
@@ -424,7 +423,7 @@
           - AUTO_UPDATE=true
         volumes:
           - /mnt/storage/jackett:/config
-          - /mnt/storage/media/torrents:/downloads
+          - /mnt/media/torrents:/downloads
         ports:
           - 9117:9117
         networks:
