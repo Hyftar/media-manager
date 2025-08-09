@@ -9,6 +9,8 @@
 
   time.timeZone = "America/Toronto";
 
+
+
   # Enable SSH
   services.openssh = {
     enable = true;
@@ -454,6 +456,29 @@
 
     environment = {
       COMPOSE_PROJECT_NAME = "media-server";
+    };
+  };
+
+  systemd.services."media-server-pull" = {
+    description = "Pull latest Docker images for media server";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      User = "hyftar";
+      WorkingDirectory = "/etc/docker-compose";
+      ExecStart = "${pkgs.docker-compose}/bin/docker-compose pull";
+    };
+  };
+
+  systemd.timers."media-server-pull" = {
+    description = "Timer to pull latest Docker images for the media server daily at 2:00 AM";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 02:00:00";
+      Persistent = true;
+      AccuracySec = "1h";
     };
   };
 
