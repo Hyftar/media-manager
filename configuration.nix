@@ -9,9 +9,6 @@
 
   time.timeZone = "America/Toronto";
 
-
-
-  # Enable SSH
   services.openssh = {
     enable = true;
     settings = {
@@ -21,14 +18,10 @@
     };
   };
 
-  # Add SSH and FTP ports to firewall
   networking.firewall = {
     enable = true;
     allowedUDPPorts = [ 6881 ];
-    allowedTCPPorts = [ 22 80 443 6881 58846 ];
-    allowedTCPPortRanges = [
-      { from = 50000; to = 50100; }  # FTP passive mode port range
-    ];
+    allowedTCPPorts = [ 22 80 443 6881 58846 ]; # SSH, HTTP, HTTPS, Deluge
   };
 
   users = {
@@ -139,12 +132,6 @@
     };
   };
 
-  # Enable systemd for managing services
-  systemd.extraConfig = ''
-    DefaultTimeoutStopSec=30s
-  '';
-
-  # Create necessary directories and set permissions
   systemd.tmpfiles.rules = [
     "d /mnt/media/series 0770 hyftar media -"
     "d /mnt/media/movies 0770 hyftar media -"
@@ -166,7 +153,6 @@
     "d /var/lib/docker-compose 0750 root root -"
   ];
 
-  # Create Caddy configuration file
   environment.etc."caddy/Caddyfile".text = ''
     # Global options
     {
@@ -498,7 +484,6 @@
     git
   ];
 
-  # Enable and start Docker service
   virtualisation.docker = {
     enable = true;
     enableNvidia = true;
@@ -507,7 +492,7 @@
 
   nixpkgs.config.packageOverrides = pkgs: {
       nvidia-container-toolkit = pkgs.nvidia-container-toolkit.overrideAttrs (oldAttrs: {
-        version = "1.17.6"; # specify your desired version
+        version = "1.17.6";
         src = pkgs.fetchFromGitHub {
           owner = "NVIDIA";
           repo = "nvidia-container-toolkit";
