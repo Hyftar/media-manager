@@ -452,9 +452,10 @@
 
     serviceConfig = {
       Type = "oneshot";
-      User = "hyftar";
+      User = "root";
       WorkingDirectory = "/etc/docker-compose";
       ExecStart = "${pkgs.docker-compose}/bin/docker-compose pull";
+      ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl stop media-server && ${pkgs.systemd}/bin/systemctl start media-server'";
     };
   };
 
