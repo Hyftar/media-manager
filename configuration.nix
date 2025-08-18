@@ -136,13 +136,13 @@
     "d /mnt/media/series 0770 hyftar media -"
     "d /mnt/media/movies 0770 hyftar media -"
     "d /mnt/media/animes 0770 hyftar media -"
-    "d /mnt/media/torrents 0770 hyftar media -"
     "Z /mnt/media/ 0770 hyftar media -" # Recursively set permissions
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
     "d /mnt/storage/emby 0750 emby emby -"
     "d /mnt/storage/deluge 0750 deluge media -"
+    "d /mnt/storage/torrents 0770 hyftar media -"
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
     "d /mnt/storage/sonarr 0770 sonarr media -"
@@ -359,6 +359,7 @@
         volumes:
           - /mnt/storage/sonarr:/config
           - /mnt/media:/media
+          - /mnt/storage/torrents:/media/torrents
         ports:
           - 8989:8989
         networks:
@@ -375,6 +376,7 @@
         volumes:
           - /mnt/storage/radarr:/config
           - /mnt/media:/media
+          - /mnt/storage/torrents:/media/torrents
         ports:
           - 7878:7878
         networks:
@@ -391,7 +393,7 @@
           - DELUGE_LOGLEVEL=error
         volumes:
           - /mnt/storage/deluge:/config
-          - /mnt/media/torrents:/media/torrents
+          - /mnt/storage/torrents:/media/torrents
         ports:
           - 8112:8112
           - 6881:6881
@@ -411,7 +413,7 @@
           - AUTO_UPDATE=true
         volumes:
           - /mnt/storage/jackett:/config
-          - /mnt/media/torrents:/downloads
+          - /mnt/storage/torrents:/downloads
         ports:
           - 9117:9117
         networks:
