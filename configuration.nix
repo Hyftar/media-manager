@@ -55,7 +55,7 @@
       hyftar = {
         isNormalUser = true;
         description = "Simon Landry";
-        extraGroups = [ "wheel" "docker" "networkmanager" ];
+        extraGroups = [ "wheel" "docker" "networkmanager" "media" ];
         home = "/mnt/storage/hyftar";
         openssh.authorizedKeys.keys = [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
@@ -89,7 +89,7 @@
         isNormalUser = false;
         createHome = false;
         group = "immich";
-        extraGroups = [ "photos" ];
+        extraGroups = [ "photos" "render" "video" ];
         uid = 901;
       };
 
@@ -136,20 +136,34 @@
     "d /mnt/media/series 0770 hyftar media -"
     "d /mnt/media/movies 0770 hyftar media -"
     "d /mnt/media/animes 0770 hyftar media -"
+
     "Z /mnt/media/ 0770 hyftar media -" # Recursively set permissions
+
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
+    "d /mnt/storage/videos 0770 immich immich -"
+
     "d /mnt/storage/emby 0750 emby emby -"
-    "d /mnt/storage/deluge 0750 deluge media -"
-    "d /mnt/storage/torrents 0770 hyftar media -"
+
+    "d /mnt/storage/deluge 0770 deluge media -"
+    "Z /mnt/storage/deluge 0770 deluge media -"
+    "d /mnt/storage/jackett 0770 deluge media -"
+    "Z /mnt/storage/jackett 0770 deluge media -"
+    "d /mnt/storage/torrents 0660 deluge media -"
+    "Z /mnt/storage/torrents 0660 deluge media -"
+
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
+
     "d /mnt/storage/sonarr 0770 sonarr media -"
     "Z /mnt/storage/sonarr 0770 sonarr media -"
+
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
+
     "Z /mnt/bark_backup 0770 bark bark -"
+
     "d /var/lib/docker-compose 0750 root root -"
   ];
 
@@ -227,6 +241,9 @@
     IMMICH_VERSION=release
     DB_PASSWORD=postgres
 
+    NVIDIA_VISIBLE_DEVICES=all
+    NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+
     # The values below this line do not need to be changed
     DB_USERNAME=postgres
     DB_DATABASE_NAME=immich
@@ -301,6 +318,9 @@
           - redis
           - database
         restart: unless-stopped
+        devices:
+          - /dev/dri:/dev/dri
+        runtime: nvidia
         networks:
           - media-network
         healthcheck:
@@ -316,6 +336,9 @@
         env_file:
           - /etc/docker-compose/.env
         restart: unless-stopped
+        devices:
+          - /dev/dri:/dev/dri
+        runtime: nvidia
         networks:
           - media-network
         healthcheck:
@@ -389,6 +412,7 @@
         environment:
           - PUID=905
           - PGID=2005
+          - UMASK=007
           - TZ=America/Toronto
           - DELUGE_LOGLEVEL=error
         volumes:
@@ -407,8 +431,8 @@
         image: lscr.io/linuxserver/jackett:latest
         container_name: jackett
         environment:
-          - PUID=1000
-          - PGID=1000
+          - PUID=905
+          - PGID=2005
           - TZ=America/Toronto
           - AUTO_UPDATE=true
         volumes:
