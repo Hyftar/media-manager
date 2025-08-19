@@ -150,8 +150,8 @@
     "Z /mnt/storage/deluge 0770 deluge media -"
     "d /mnt/storage/jackett 0770 deluge media -"
     "Z /mnt/storage/jackett 0770 deluge media -"
-    "d /mnt/storage/torrents 0660 deluge media -"
-    "Z /mnt/storage/torrents 0660 deluge media -"
+    "d /mnt/storage/torrents 0770 deluge media -"
+    "Z /mnt/storage/torrents 0770 deluge media -"
 
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
