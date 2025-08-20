@@ -291,6 +291,7 @@
           - /mnt/media/movies:/media/movies
           - /mnt/media/series:/media/series
           - /mnt/media/animes:/media/animes
+          - /etc/localtime:/etc/localtime:ro
         ports:
           - 8096:8096
           - 8920:8920
