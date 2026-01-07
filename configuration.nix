@@ -450,6 +450,8 @@
           timeout: 3s
           interval: 15s
           retries: 3
+        networks:
+          - media-network
         restart: unless-stopped
 
       deluge:
