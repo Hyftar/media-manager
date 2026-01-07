@@ -130,11 +130,11 @@
         uid = 905;
       };
 
-      overseerr = {
+      jellyseerr = {
         isSystemUser = true;
         isNormalUser = false;
         createHome = false;
-        description = "Overseerr user";
+        description = "jellyseerr user";
         group = "media";
         uid = 906;
       };
@@ -171,8 +171,8 @@
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
 
-    "d /mnt/storage/overseerr 0770 overseerr media -"
-    "Z /mnt/storage/overseerr 0770 overseerr media -"
+    "d /mnt/storage/jellyseerr 0770 jellyseerr media -"
+    "Z /mnt/storage/jellyseerr 0770 jellyseerr media -"
 
     "Z /mnt/bark_backup 0770 bark bark -"
 
@@ -430,9 +430,10 @@
           - media-network
         restart: unless-stopped
 
-      overseerr:
-        image: sctx/overseerr:latest
-        container_name: overseerr
+      jellyseerr:
+        image: ghcr.io/fallenbagel/jellyseerr:latest
+        init: true
+        container_name: jellyseerr
         environment:
           - LOG_LEVEL=error
           - PUID=906
@@ -442,7 +443,13 @@
         ports:
           - 5055:5055
         volumes:
-          - /mnt/storage/overseerr:/app/config
+          - /mnt/storage/jellyseerr:/app/config
+        healthcheck:
+          test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+          start_period: 20s
+          timeout: 3s
+          interval: 15s
+          retries: 3
         restart: unless-stopped
 
       deluge:
