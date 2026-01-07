@@ -129,6 +129,15 @@
         group = "media";
         uid = 905;
       };
+
+      overseerr = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Overseerr user";
+        group = "media";
+        uid = 906;
+      };
     };
   };
 
@@ -161,6 +170,9 @@
 
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
+
+    "d /mnt/storage/overseerr 0770 overseerr media -"
+    "Z /mnt/storage/overseerr 0770 overseerr media -"
 
     "Z /mnt/bark_backup 0770 bark bark -"
 
@@ -210,6 +222,17 @@
 
     radarr.grosluxe.ca {
       reverse_proxy radarr:7878
+      header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+      }
+    }
+
+    requests.grosluxe.ca {
+      reverse_proxy requests:5055
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -405,6 +428,21 @@
           - 7878:7878
         networks:
           - media-network
+        restart: unless-stopped
+
+      overseerr:
+        image: sctx/overseerr:latest
+        container_name: overseerr
+        environment:
+          - LOG_LEVEL=error
+          - PUID=906
+          - PGID=2005
+          - TZ=America/Toronto
+          - PORT=5055
+        ports:
+          - 5055:5055
+        volumes:
+          - /mnt/storage/overseerr:/app/config
         restart: unless-stopped
 
       deluge:
