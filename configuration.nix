@@ -232,7 +232,7 @@
     }
 
     requests.grosluxe.ca {
-      reverse_proxy requests:5055
+      reverse_proxy jellyseerr:5055
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
