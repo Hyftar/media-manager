@@ -11,6 +11,7 @@ The following services are included:
 - Sonarr, for managing TV shows
 - Radarr, for managing movies
 - Immich, for managing photos and videos
+- Jellyserr, for managing movies and series requests
 
 All of which, are running in Docker containers managed by a Docker Compose file.
 
