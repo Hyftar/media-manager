@@ -455,7 +455,7 @@
         restart: unless-stopped
 
       deluge:
-        image: lscr.io/linuxserver/deluge:latest
+        image: lscr.io/linuxserver/deluge:2.1.1
         container_name: deluge
         environment:
           - PUID=905
