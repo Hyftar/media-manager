@@ -523,9 +523,8 @@
       mealie:
         image: ghcr.io/mealie-recipes/mealie:v3.11.0
         container_name: mealie
-        restart: always
         ports:
-          - "9925:9000"
+          - 9925:9000
         deploy:
           resources:
             limits:
@@ -540,6 +539,9 @@
           BASE_URL: https://recettes.grosluxe.ca
           DAILY_SCHEDULE_TIME: 23:30
           TOKEN_TIME: 4800
+        restart: unless-stopped
+        networks:
+          - media-network
 
     volumes:
       model-cache:
