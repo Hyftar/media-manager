@@ -337,6 +337,7 @@
           - NVIDIA_VISIBLE_DEVICES=all
           - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
         volumes:
+          - /mnt/storage/emby/backups:/backups
           - /mnt/storage/emby/config:/config
           - /mnt/media/movies:/media/movies
           - /mnt/media/series:/media/series
