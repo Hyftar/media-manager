@@ -49,13 +49,17 @@
       caddy = {
         gid = 2009;
       };
+
+      mealie = {
+        gid = 2010;
+      };
     };
 
     users = {
       hyftar = {
         isNormalUser = true;
         description = "Simon Landry";
-        extraGroups = [ "wheel" "docker" "networkmanager" "media" ];
+        extraGroups = [ "wheel" "docker" "networkmanager" "media" "mealie" ];
         home = "/mnt/storage/hyftar";
         openssh.authorizedKeys.keys = [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
@@ -138,6 +142,15 @@
         group = "media";
         uid = 906;
       };
+
+      mealie = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "mealie user";
+        group = "mealie";
+        uid = 907;
+      };
     };
   };
 
@@ -154,6 +167,9 @@
     "d /mnt/storage/videos 0770 immich immich -"
 
     "d /mnt/storage/emby 0750 emby emby -"
+    "d /mnt/storage/emby/backups 0750 emby emby -"
+
+    "d /mnt/storage/mealie 0770 mealie mealie -"
 
     "d /mnt/storage/deluge 0770 deluge media -"
     "Z /mnt/storage/deluge 0770 deluge media -"
@@ -244,6 +260,17 @@
 
     deluge.grosluxe.ca {
       reverse_proxy deluge:8112
+      header {
+        # Security headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+      }
+    }
+
+    recettes.grosluxe.ca {
+      reverse_proxy mealie:9925
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -491,6 +518,27 @@
         networks:
           - media-network
         restart: unless-stopped
+
+      mealie:
+        image: ghcr.io/mealie-recipes/mealie:v3.11.0
+        container_name: mealie
+        restart: always
+        ports:
+          - "9925:9000"
+        deploy:
+          resources:
+            limits:
+              memory: 512M
+        volumes:
+          - /mnt/storage/mealie:/app/data/
+        environment:
+          ALLOW_SIGNUP: "false"
+          PUID: 907
+          PGID: 2010
+          TZ: America/Toronto
+          BASE_URL: https://recettes.grosluxe.ca
+          DAILY_SCHEDULE_TIME: 23:30
+          TOKEN_TIME: 4800
 
     volumes:
       model-cache:
