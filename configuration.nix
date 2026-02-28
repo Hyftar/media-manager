@@ -205,79 +205,30 @@
 
     emby.grosluxe.ca {
       reverse_proxy emby:8096
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     photos.grosluxe.ca {
       reverse_proxy immich_server:2283
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     sonarr.grosluxe.ca {
       reverse_proxy sonarr:8989
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     radarr.grosluxe.ca {
       reverse_proxy radarr:7878
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     requests.grosluxe.ca {
       reverse_proxy jellyseerr:5055
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     deluge.grosluxe.ca {
       reverse_proxy deluge:8112
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
 
     recettes.grosluxe.ca {
       reverse_proxy mealie:9000
-      header {
-        # Security headers
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-      }
     }
   '';
 
