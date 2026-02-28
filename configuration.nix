@@ -270,7 +270,7 @@
     }
 
     recettes.grosluxe.ca {
-      reverse_proxy mealie:9925
+      reverse_proxy mealie:9000
       header {
         # Security headers
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
