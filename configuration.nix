@@ -59,7 +59,7 @@
       hyftar = {
         isNormalUser = true;
         description = "Simon Landry";
-        extraGroups = [ "wheel" "docker" "networkmanager" "media" "mealie" ];
+        extraGroups = [ "wheel" "docker" "networkmanager" "media" "mealie" "immich" ];
         home = "/mnt/storage/hyftar";
         openssh.authorizedKeys.keys = [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
@@ -138,7 +138,7 @@
         isSystemUser = true;
         isNormalUser = false;
         createHome = false;
-        description = "jellyseerr user";
+        description = "seerr user";
         group = "media";
         uid = 906;
       };
@@ -168,6 +168,7 @@
 
     "d /mnt/storage/emby 0750 emby emby -"
     "d /mnt/storage/emby/backups 0750 emby emby -"
+    "Z /mnt/storage/emby/ 0750 emby media -"
 
     "d /mnt/storage/mealie 0770 mealie mealie -"
 
@@ -220,7 +221,7 @@
     }
 
     requests.grosluxe.ca {
-      reverse_proxy jellyseerr:5055
+      reverse_proxy seerr:5055
     }
 
     deluge.grosluxe.ca {
@@ -409,10 +410,10 @@
           - media-network
         restart: unless-stopped
 
-      jellyseerr:
-        image: ghcr.io/fallenbagel/jellyseerr:latest
+      seerr:
+        image: ghcr.io/seerr-team/seerr:latest
         init: true
-        container_name: jellyseerr
+        container_name: seerr
         environment:
           - LOG_LEVEL=error
           - PUID=906
