@@ -174,8 +174,7 @@
 
     "d /mnt/storage/deluge 0770 deluge media -"
     "Z /mnt/storage/deluge 0770 deluge media -"
-    "d /mnt/storage/jackett 0770 deluge media -"
-    "Z /mnt/storage/jackett 0770 deluge media -"
+
     "d /mnt/storage/torrents 0770 deluge media -"
     "Z /mnt/storage/torrents 0770 deluge media -"
 
@@ -187,6 +186,9 @@
 
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
+
+    "d /mnt/storage/prowlarr 0770 radarr media -"
+    "Z /mnt/storage/prowlarr 0770 radarr media -"
 
     "d /mnt/storage/jellyseerr 0770 jellyseerr media -"
     "Z /mnt/storage/jellyseerr 0770 jellyseerr media -"
@@ -222,10 +224,6 @@
 
     requests.grosluxe.ca {
       reverse_proxy seerr:5055
-    }
-
-    deluge.grosluxe.ca {
-      reverse_proxy deluge:8112
     }
 
     recettes.grosluxe.ca {
@@ -455,19 +453,17 @@
           - media-network
         restart: unless-stopped
 
-      jackett:
-        image: lscr.io/linuxserver/jackett:latest
-        container_name: jackett
+      prowlarr:
+        image: lscr.io/linuxserver/prowlarr:latest
+        container_name: prowlarr
         environment:
-          - PUID=905
+          - PUID=904
           - PGID=2005
           - TZ=America/Toronto
-          - AUTO_UPDATE=true
         volumes:
-          - /mnt/storage/jackett:/config
-          - /mnt/storage/torrents:/downloads
+          - /mnt/storage/prowlarr:/config
         ports:
-          - 9117:9117
+          - 9696:9696
         networks:
           - media-network
         restart: unless-stopped
