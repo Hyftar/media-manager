@@ -190,8 +190,8 @@
     "d /mnt/storage/prowlarr 0770 radarr media -"
     "Z /mnt/storage/prowlarr 0770 radarr media -"
 
-    "d /mnt/storage/jellyseerr 0770 jellyseerr media -"
-    "Z /mnt/storage/jellyseerr 0770 jellyseerr media -"
+    "d /mnt/storage/jellyseerr 0770 node media -"
+    "Z /mnt/storage/jellyseerr 0770 node media -"
 
     "Z /mnt/bark_backup 0770 bark bark -"
 
