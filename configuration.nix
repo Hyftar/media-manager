@@ -289,6 +289,7 @@
         volumes:
           - /mnt/storage/emby/backups:/backups
           - /mnt/storage/emby/config:/config
+          - /mnt/storage/books:/media/books
           - /mnt/media/movies:/media/movies
           - /mnt/media/series:/media/series
           - /mnt/media/animes:/media/animes
