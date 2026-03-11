@@ -519,27 +519,65 @@
     };
   };
 
-  systemd.services."media-server-pull" = {
-    description = "Pull latest Docker images for media server";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
+  systemd.services = {
+    "media-server-pull" = {
+      description = "Pull latest Docker images for media server";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
 
-    serviceConfig = {
-      Type = "oneshot";
-      User = "root";
-      WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose pull";
-      ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl stop media-server && ${pkgs.systemd}/bin/systemctl start media-server'";
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+        WorkingDirectory = "/etc/docker-compose";
+        ExecStart = "${pkgs.docker-compose}/bin/docker-compose pull";
+        ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl stop media-server && ${pkgs.systemd}/bin/systemctl start media-server'";
+      };
+    };
+
+    "config-backup" = {
+      description = "Backup app configs and databases";
+      serviceConfig = {
+        User = "hyftar";
+        ExecStart = "/mnt/storage/hyftar/Scripts/backup.sh apps";
+      };
+    };
+
+    "immich-backup" = {
+      description = "Backup immich uploads";
+      serviceConfig = {
+        User = "hyftar";
+        ExecStart = "/mnt/storage/hyftar/Scripts/backup.sh immich";
+      };
     };
   };
 
-  systemd.timers."media-server-pull" = {
-    description = "Timer to pull latest Docker images for the media server daily at 2:00 AM";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 02:00:00";
-      Persistent = true;
-      AccuracySec = "1h";
+  systemd.timers = {
+    "media-server-pull" = {
+      description = "Timer to pull latest Docker images for the media server daily at 2:00 AM";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*-*-* 02:00:00";
+        Persistent = true;
+        AccuracySec = "1h";
+      };
+    };
+
+    "config-backup" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*-*-* 05:00:00";
+        Persistent = true;
+        AccuracySec = "1h";
+      };
+    };
+
+    "immich-backup" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*-*-* 03:00:00";
+        Persistent = true;
+        AccuracySec = "1h";
+      };
     };
   };
 
