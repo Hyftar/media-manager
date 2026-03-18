@@ -32,17 +32,6 @@
       maxtime = "168h";
       overalljails = true; # Calculate the bantime based on all the violations
     };
-    jails = {
-      apache-nohome-iptables.settings = {
-        filter = "apache-nohome";
-        action = ''iptables-multiport[name=HTTP, port="http,https"]'';
-        logpath = "/var/log/httpd/error_log*";
-        backend = "auto";
-        findtime = 600;
-        bantime  = 600;
-        maxretry = 5;
-      };
-    };
   };
 
   networking.firewall = {
