@@ -538,7 +538,7 @@
       description = "Backup app configs and databases";
       serviceConfig = {
         User = "hyftar";
-        ExecStart = "/mnt/storage/hyftar/Scripts/backup.sh apps";
+        ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh apps'";
       };
     };
 
@@ -546,7 +546,7 @@
       description = "Backup immich uploads";
       serviceConfig = {
         User = "hyftar";
-        ExecStart = "/mnt/storage/hyftar/Scripts/backup.sh immich";
+        ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh immich'";
       };
     };
   };
