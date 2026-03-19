@@ -20,7 +20,6 @@
 
   services.fail2ban = {
     enable = true;
-   # Ban IP after 5 failures
     maxretry = 5;
     ignoreIP = [
       "192.168.0.0/16"
@@ -217,33 +216,118 @@
   environment.etc."caddy/Caddyfile".text = ''
     # Global options
     {
-      admin localhost:2019
-      # Enable automatic HTTPS with Let's Encrypt
       email simonlandry762@gmail.com
+      servers {
+        trusted_proxies static private_ranges
+      }
+    }
+
+    (secure_headers) {
+      header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+      }
     }
 
     emby.grosluxe.ca {
-      reverse_proxy emby:8096
+      import secure_headers
+
+      handle /Users/AuthenticateByName* {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy emby:8096
+      }
+
+      handle /Users/ForgotPassword* {
+        rate_limit {remote_host} 3r/m
+        reverse_proxy emby:8096
+      }
+
+      handle {
+        reverse_proxy emby:8096
+      }
     }
 
     photos.grosluxe.ca {
-      reverse_proxy immich_server:2283
-    }
+      import secure_headers
 
-    sonarr.grosluxe.ca {
-      reverse_proxy sonarr:8989
-    }
+      handle /api/auth/login {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy immich_server:2283
+      }
 
-    radarr.grosluxe.ca {
-      reverse_proxy radarr:7878
+      handle /api/auth/admin-sign-up {
+        rate_limit {remote_host} 3r/m
+        reverse_proxy immich_server:2283
+      }
+
+      handle /api/oauth* {
+        rate_limit {remote_host} 10r/m
+        reverse_proxy immich_server:2283
+      }
+
+      handle {
+        reverse_proxy immich_server:2283
+      }
     }
 
     requests.grosluxe.ca {
-      reverse_proxy seerr:5055
+      import secure_headers
+
+      handle /api/v1/auth/local {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy seerr:5055
+      }
+
+      handle {
+        reverse_proxy seerr:5055
+      }
+    }
+
+    sonarr.grosluxe.ca {
+      import secure_headers
+
+      handle /login* {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy sonarr:8989
+      }
+
+      handle {
+        reverse_proxy sonarr:8989
+      }
+    }
+
+    radarr.grosluxe.ca {
+      import secure_headers
+
+      handle /login* {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy radarr:7878
+      }
+
+      handle {
+        reverse_proxy radarr:7878
+      }
     }
 
     recettes.grosluxe.ca {
-      reverse_proxy mealie:9000
+      import secure_headers
+
+      handle /api/auth/token {
+        rate_limit {remote_host} 5r/m
+        reverse_proxy mealie:9000
+      }
+
+      handle /api/users/reset-password {
+        rate_limit {remote_host} 3r/m
+        reverse_proxy mealie:9000
+      }
+
+      handle {
+        reverse_proxy mealie:9000
+      }
     }
   '';
 
