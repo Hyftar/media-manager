@@ -214,7 +214,6 @@
   ];
 
   environment.etc."caddy/Caddyfile".text = ''
-    # Global options
     {
       email simonlandry762@gmail.com
       servers {
@@ -234,100 +233,32 @@
 
     emby.grosluxe.ca {
       import secure_headers
-
-      handle /Users/AuthenticateByName* {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy emby:8096
-      }
-
-      handle /Users/ForgotPassword* {
-        rate_limit {remote_host} 3r/m
-        reverse_proxy emby:8096
-      }
-
-      handle {
-        reverse_proxy emby:8096
-      }
+      reverse_proxy emby:8096
     }
 
     photos.grosluxe.ca {
       import secure_headers
-
-      handle /api/auth/login {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy immich_server:2283
-      }
-
-      handle /api/auth/admin-sign-up {
-        rate_limit {remote_host} 3r/m
-        reverse_proxy immich_server:2283
-      }
-
-      handle /api/oauth* {
-        rate_limit {remote_host} 10r/m
-        reverse_proxy immich_server:2283
-      }
-
-      handle {
-        reverse_proxy immich_server:2283
-      }
+      reverse_proxy immich_server:2283
     }
 
     requests.grosluxe.ca {
       import secure_headers
-
-      handle /api/v1/auth/local {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy seerr:5055
-      }
-
-      handle {
-        reverse_proxy seerr:5055
-      }
+      reverse_proxy seerr:5055
     }
 
     sonarr.grosluxe.ca {
       import secure_headers
-
-      handle /login* {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy sonarr:8989
-      }
-
-      handle {
-        reverse_proxy sonarr:8989
-      }
+      reverse_proxy sonarr:8989
     }
 
     radarr.grosluxe.ca {
       import secure_headers
-
-      handle /login* {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy radarr:7878
-      }
-
-      handle {
-        reverse_proxy radarr:7878
-      }
+      reverse_proxy radarr:7878
     }
 
     recettes.grosluxe.ca {
       import secure_headers
-
-      handle /api/auth/token {
-        rate_limit {remote_host} 5r/m
-        reverse_proxy mealie:9000
-      }
-
-      handle /api/users/reset-password {
-        rate_limit {remote_host} 3r/m
-        reverse_proxy mealie:9000
-      }
-
-      handle {
-        reverse_proxy mealie:9000
-      }
+      reverse_proxy mealie:9000
     }
   '';
 
