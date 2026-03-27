@@ -567,6 +567,10 @@
 
     "config-backup" = {
       description = "Backup app configs and databases";
+      path = [
+        pkgs.bash
+        pkgs.borg
+      ];
       serviceConfig = {
         User = "hyftar";
         ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh apps'";
@@ -575,6 +579,10 @@
 
     "immich-backup" = {
       description = "Backup immich uploads";
+      path = [
+        pkgs.bash
+        pkgs.borg
+      ];
       serviceConfig = {
         User = "hyftar";
         ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh immich'";
