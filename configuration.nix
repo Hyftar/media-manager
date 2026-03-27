@@ -569,7 +569,7 @@
       description = "Backup app configs and databases";
       path = [
         pkgs.bash
-        pkgs.borg
+        pkgs.borgbackup
       ];
       serviceConfig = {
         User = "hyftar";
@@ -581,7 +581,7 @@
       description = "Backup immich uploads";
       path = [
         pkgs.bash
-        pkgs.borg
+        pkgs.borgbackup
       ];
       serviceConfig = {
         User = "hyftar";
