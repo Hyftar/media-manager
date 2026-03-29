@@ -309,7 +309,6 @@
         image: quenary/tugtainer:latest
         container_name: tugtainer
         restart: unless-stopped
-        user: 908:2011 # tugtainer:tugtainer
         group_add:
           - ${toString config.users.groups.docker.gid}
         environment:
