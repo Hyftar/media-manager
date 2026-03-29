@@ -310,11 +310,9 @@
         container_name: tugtainer
         restart: unless-stopped
         ports:
-          - 5678:5678
+          - 5678:80
         group_add:
           - ${toString config.users.groups.docker.gid}
-        environment:
-          - PORT=5678
         volumes:
           - /mnt/storage/tugtainer:/tugtainer
           - /var/run/docker.sock:/var/run/docker.sock:ro
