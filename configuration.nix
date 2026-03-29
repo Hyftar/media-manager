@@ -72,6 +72,10 @@
       tugtainer = {
         gid = 2011;
       };
+
+      docker = {
+        gid = 2012;
+      };
     };
 
     users = {
@@ -309,7 +313,9 @@
         image: quenary/tugtainer:latest
         container_name: tugtainer
         restart: unless-stopped
-        user: 908:2005
+        user: 908:2011 # tugtainer:tugtainer
+        group_add:
+          - 2012 # Docker group
         environment:
           - PORT=5678
         volumes:
@@ -326,7 +332,6 @@
         driver: bridge
 
     services:
-      # Caddy reverse proxy
       caddy:
         image: caddy:latest
         container_name: caddy
@@ -344,7 +349,6 @@
           - emby
           - immich-server
 
-      # Emby media server with NVIDIA GPU support
       emby:
         image: emby/embyserver:beta
         container_name: emby
