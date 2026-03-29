@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
-    ./emby-server.nix
+    ./media.nix
     ./immich.nix
     ./mealie.nix
   ];
