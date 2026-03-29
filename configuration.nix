@@ -319,10 +319,17 @@
           - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
           - media-network
+
+    networks:
+      media-network:
+        external: true
+        name: media-server_media-network
   '';
 
   # Create docker-compose configuration
   environment.etc."docker-compose/docker-compose.yml".text = ''
+    name: media-server
+
     networks:
       media-network:
         driver: bridge
