@@ -205,9 +205,9 @@
   # Systemd service to manage caddy and the media-network docker network
   systemd.services.cia-server = {
     description = "CIA Server Docker Compose";
-    after = [ "docker.service" "network-online.target" ];
+    after = [ "docker.service" "docker.socket" "network-online.target" ];
     wants = [ "network-online.target" ];
-    requires = [ "docker.service" ];
+    requires = [ "docker.service" "docker.socket" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
@@ -218,6 +218,8 @@
       ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml down";
       ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml restart";
       TimeoutStartSec = 300;
+      Restart = "on-abnormal";
+      RestartSec = 25;
     };
   };
 

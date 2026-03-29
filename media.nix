@@ -211,7 +211,7 @@
         name: cia-server_cia-network
   '';
 
-  systemd.services.media-service = {
+  systemd.services.media = {
     description = "Media Service Docker Compose";
     after = [ "docker.service" "network-online.target" "cia-server.service" ];
     wants = [ "network-online.target" ];
