@@ -32,9 +32,6 @@
     IMMICH_VERSION=release
     DB_PASSWORD=postgres
 
-    NVIDIA_VISIBLE_DEVICES=all
-    NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-
     # The values below this line do not need to be changed
     DB_USERNAME=postgres
     DB_DATABASE_NAME=immich
@@ -69,29 +66,11 @@
         healthcheck:
           disable: false
 
-      immich-machine-learning:
-        container_name: immich_machine_learning
-        group_add:
-          - 2007
-        image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
-        volumes:
-          - model-cache:/cache
-        env_file:
-          - /etc/docker-compose/.env
-        restart: unless-stopped
-        devices:
-          - /dev/dri:/dev/dri
-        runtime: nvidia
-        networks:
-          - cia-network
-        healthcheck:
-          disable: false
-
       redis:
         container_name: immich_redis
         group_add:
           - 2007
-        image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
+        image: docker.io/valkey/valkey:9@sha256:3eeb09785cd61ec8e3be35f8804c8892080f3ca21934d628abc24ee4ed1698f6
         healthcheck:
           test: redis-cli ping || exit 1
         networks:
@@ -102,7 +81,7 @@
         container_name: immich_postgres
         group_add:
           - 2007
-        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
         environment:
           POSTGRES_PASSWORD: ''${DB_PASSWORD}
           POSTGRES_USER: ''${DB_USERNAME}
@@ -114,9 +93,6 @@
         networks:
           - cia-network
         restart: unless-stopped
-
-    volumes:
-      model-cache:
 
     networks:
       cia-network:
