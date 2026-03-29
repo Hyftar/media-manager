@@ -309,6 +309,8 @@
         image: quenary/tugtainer:latest
         container_name: tugtainer
         restart: unless-stopped
+        ports:
+          - 5678:5678
         group_add:
           - ${toString config.users.groups.docker.gid}
         environment:
