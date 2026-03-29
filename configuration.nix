@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 {
   imports = [
-    ./media.nix
+    ./emby-server.nix
     ./immich.nix
     ./mealie.nix
   ];
@@ -95,6 +95,7 @@
         extraGroups = [ ];
         uid = 902;
       };
+
     };
   };
 
@@ -130,7 +131,7 @@
 
     docker.grosluxe.ca {
       import secure_headers
-      reverse_proxy
+      reverse_proxy tugtainer:80
     }
 
     emby.grosluxe.ca {
@@ -161,11 +162,6 @@
     recettes.grosluxe.ca {
       import secure_headers
       reverse_proxy mealie:9000
-    }
-
-    docker.grosluxe.ca {
-      import secure_headers
-      reverse_proxy tugtainer:5678
     }
   '';
 
