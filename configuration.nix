@@ -72,10 +72,6 @@
       tugtainer = {
         gid = 2011;
       };
-
-      docker = {
-        gid = 2012;
-      };
     };
 
     users = {
@@ -315,7 +311,7 @@
         restart: unless-stopped
         user: 908:2011 # tugtainer:tugtainer
         group_add:
-          - 2012 # Docker group
+          - ${toString config.users.groups.docker.gid}
         environment:
           - PORT=5678
         volumes:
