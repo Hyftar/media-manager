@@ -68,6 +68,10 @@
       mealie = {
         gid = 2010;
       };
+
+      tugtainer = {
+        gid = 2011;
+      };
     };
 
     users = {
