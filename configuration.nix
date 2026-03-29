@@ -582,6 +582,7 @@
     };
   };
 
+  systemd.services = {
     "config-backup" = {
       description = "Backup app configs and databases";
       path = [
