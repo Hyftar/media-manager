@@ -1,5 +1,11 @@
 { config, pkgs, ... }:
 {
+  imports = [
+    ./media.nix
+    ./immich.nix
+    ./mealie.nix
+  ];
+
   system.stateVersion = "25.05";
 
   boot.loader.grub = {
@@ -53,24 +59,8 @@
         gid = 2006;
       };
 
-      immich = {
-        gid = 2007;
-      };
-
-      emby = {
-        gid = 2008;
-      };
-
       caddy = {
         gid = 2009;
-      };
-
-      mealie = {
-        gid = 2010;
-      };
-
-      tugtainer = {
-        gid = 2011;
       };
     };
 
@@ -96,36 +86,6 @@
         ];
       };
 
-      tugtainer = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "Tugtainer docker manager user";
-        group = "tugtainer";
-        extraGroups = [ "docker" ];
-        uid = 908;
-      };
-
-      emby = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "Emby user";
-        group = "emby";
-        extraGroups = [ "media" "render" "video" ];
-        uid = 900;
-      };
-
-      immich = {
-        description = "Immich user";
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        group = "immich";
-        extraGroups = [ "photos" "render" "video" ];
-        uid = 901;
-      };
-
       caddy = {
         description = "Caddy user";
         isSystemUser = true;
@@ -135,95 +95,15 @@
         extraGroups = [ ];
         uid = 902;
       };
-
-      sonarr = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "Sonarr user";
-        group = "media";
-        uid = 903;
-      };
-
-      radarr = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "Radarr user";
-        group = "media";
-        uid = 904;
-      };
-
-      deluge = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "Deluge user";
-        group = "media";
-        uid = 905;
-      };
-
-      jellyseerr = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "seerr user";
-        group = "media";
-        uid = 906;
-      };
-
-      mealie = {
-        isSystemUser = true;
-        isNormalUser = false;
-        createHome = false;
-        description = "mealie user";
-        group = "mealie";
-        uid = 907;
-      };
     };
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/media/series 0770 hyftar media -"
-    "d /mnt/media/movies 0770 hyftar media -"
-    "d /mnt/media/animes 0770 hyftar media -"
-
-    "Z /mnt/media/ 0770 hyftar media -" # Recursively set permissions
-
-    "d /mnt/storage/tugtainer 0770 tugtainer media -"
-    "Z /mnt/storage/tugtainer 0770 tugtainer media -"
-
-    "d /mnt/storage/immich 0770 immich immich -"
-    "d /mnt/storage/immich/upload 0770 immich immich -"
-    "d /mnt/storage/immich/data 0770 immich immich -"
-    "d /mnt/storage/videos 0770 immich immich -"
-
-    "d /mnt/storage/emby 0750 emby emby -"
-    "d /mnt/storage/emby/backups 0750 emby emby -"
-    "Z /mnt/storage/emby/ 0750 emby media -"
-
-    "d /mnt/storage/mealie 0770 mealie mealie -"
-
-    "d /mnt/storage/deluge 0770 deluge media -"
-    "Z /mnt/storage/deluge 0770 deluge media -"
-
-    "d /mnt/storage/torrents 0770 deluge media -"
-    "Z /mnt/storage/torrents 0770 deluge media -"
+    "d /mnt/storage/tugtainer 0770 hyftar media -"
+    "Z /mnt/storage/tugtainer 0770 hyftar media -"
 
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
-
-    "d /mnt/storage/sonarr 0770 sonarr media -"
-    "Z /mnt/storage/sonarr 0770 sonarr media -"
-
-    "d /mnt/storage/radarr 0770 radarr media -"
-    "Z /mnt/storage/radarr 0770 radarr media -"
-
-    "d /mnt/storage/prowlarr 0770 radarr media -"
-    "Z /mnt/storage/prowlarr 0770 radarr media -"
-
-    "d /mnt/storage/jellyseerr 0770 node media -"
-    "Z /mnt/storage/jellyseerr 0770 node media -"
 
     "Z /mnt/bark_backup 0770 bark bark -"
 
@@ -282,29 +162,35 @@
       import secure_headers
       reverse_proxy mealie:9000
     }
+
+    docker.grosluxe.ca {
+      import secure_headers
+      reverse_proxy tugtainer:5678
+    }
   '';
 
-  # Docker-compose .env file
-  environment.etc."docker-compose/.env".text = ''
-    # == Begin Immich config ==
-    UPLOAD_LOCATION=/mnt/storage/immich/upload
-    DB_DATA_LOCATION=/mnt/storage/immich/data
+  environment.etc."docker-compose/docker-compose.yml".text = ''
+    name: cia-server
 
-    TZ=America/Toronto
-    IMMICH_VERSION=release
-    DB_PASSWORD=postgres
+    networks:
+      cia-network:
+        driver: bridge
 
-    NVIDIA_VISIBLE_DEVICES=all
-    NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-
-    # The values below this line do not need to be changed
-    DB_USERNAME=postgres
-    DB_DATABASE_NAME=immich
-    # == End Immich config ==
-  '';
-
-  environment.etc."docker-compose/docker-compose.tugtainer.yml".text = ''
     services:
+      caddy:
+        image: caddy:latest
+        container_name: caddy
+        restart: unless-stopped
+        ports:
+          - 80:80
+          - 443:443
+        volumes:
+          - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+          - /mnt/storage/caddy/data:/data
+          - /mnt/storage/caddy/config:/config
+        networks:
+          - cia-network
+
       tugtainer:
         image: quenary/tugtainer:latest
         container_name: tugtainer
@@ -317,263 +203,12 @@
           - /mnt/storage/tugtainer:/tugtainer
           - /var/run/docker.sock:/var/run/docker.sock:ro
         networks:
-          - media-network
-
-    networks:
-      media-network:
-        external: true
-        name: media-server_media-network
+          - cia-network
   '';
 
-  # Create docker-compose configuration
-  environment.etc."docker-compose/docker-compose.yml".text = ''
-    name: media-server
-
-    networks:
-      media-network:
-        driver: bridge
-
-    services:
-      caddy:
-        image: caddy:latest
-        container_name: caddy
-        restart: unless-stopped
-        ports:
-          - "80:80"
-          - "443:443"
-        volumes:
-          - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-          - /mnt/storage/caddy/data:/data
-          - /mnt/storage/caddy/config:/config
-        networks:
-          - media-network
-        depends_on:
-          - emby
-          - immich-server
-
-      emby:
-        image: emby/embyserver:beta
-        container_name: emby
-        restart: unless-stopped
-        environment:
-          - UID=900
-          - GID=2005
-          - GIDLIST=2005
-          - NVIDIA_VISIBLE_DEVICES=all
-          - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-        volumes:
-          - /mnt/storage/emby/backups:/backups
-          - /mnt/storage/emby/config:/config
-          - /mnt/storage/books:/media/books
-          - /mnt/media/movies:/media/movies
-          - /mnt/media/series:/media/series
-          - /mnt/media/animes:/media/animes
-          - /etc/localtime:/etc/localtime:ro
-        ports:
-          - 8096:8096
-          - 8920:8920
-        devices:
-          - /dev/dri:/dev/dri
-        runtime: nvidia
-        networks:
-          - media-network
-
-      # Immich
-      immich-server:
-        container_name: immich_server
-        group_add:
-          - 2007
-        image: ghcr.io/immich-app/immich-server:''${IMMICH_VERSION:-release}
-        volumes:
-          - ''${UPLOAD_LOCATION}:/usr/src/app/upload
-          - /mnt/storage/pictures:/mnt/storage/pictures
-          - /etc/localtime:/etc/localtime:ro
-        env_file:
-          - /etc/docker-compose/.env
-        ports:
-          - '2283:2283'
-        depends_on:
-          - redis
-          - database
-        restart: unless-stopped
-        devices:
-          - /dev/dri:/dev/dri
-        runtime: nvidia
-        networks:
-          - media-network
-        healthcheck:
-          disable: false
-
-      immich-machine-learning:
-        container_name: immich_machine_learning
-        group_add:
-          - 2007
-        image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}
-        volumes:
-          - model-cache:/cache
-        env_file:
-          - /etc/docker-compose/.env
-        restart: unless-stopped
-        devices:
-          - /dev/dri:/dev/dri
-        runtime: nvidia
-        networks:
-          - media-network
-        healthcheck:
-          disable: false
-
-      redis:
-        container_name: immich_redis
-        group_add:
-          - 2007
-        image: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
-        healthcheck:
-          test: redis-cli ping || exit 1
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      database:
-        container_name: immich_postgres
-        group_add:
-          - 2007
-        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
-        environment:
-          POSTGRES_PASSWORD: ''${DB_PASSWORD}
-          POSTGRES_USER: ''${DB_USERNAME}
-          POSTGRES_DB: ''${DB_DATABASE_NAME}
-          POSTGRES_INITDB_ARGS: '--data-checksums'
-          DB_STORAGE_TYPE: 'HDD'
-        volumes:
-          - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      sonarr:
-        image: lscr.io/linuxserver/sonarr:latest
-        container_name: sonarr
-        environment:
-          - PUID=903
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/sonarr:/config
-          - /mnt/media:/media
-          - /mnt/storage/torrents:/media/torrents
-        ports:
-          - 8989:8989
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      radarr:
-        image: lscr.io/linuxserver/radarr:latest
-        container_name: radarr
-        environment:
-          - PUID=904
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/radarr:/config
-          - /mnt/media:/media
-          - /mnt/storage/torrents:/media/torrents
-        ports:
-          - 7878:7878
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      seerr:
-        image: ghcr.io/seerr-team/seerr:latest
-        init: true
-        container_name: seerr
-        environment:
-          - LOG_LEVEL=error
-          - PUID=906
-          - PGID=2005
-          - TZ=America/Toronto
-          - PORT=5055
-        ports:
-          - 5055:5055
-        volumes:
-          - /mnt/storage/jellyseerr:/app/config
-        healthcheck:
-          test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
-          start_period: 20s
-          timeout: 3s
-          interval: 15s
-          retries: 3
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      deluge:
-        image: lscr.io/linuxserver/deluge:2.1.1
-        container_name: deluge
-        environment:
-          - PUID=905
-          - PGID=2005
-          - UMASK=007
-          - TZ=America/Toronto
-          - DELUGE_LOGLEVEL=error
-        volumes:
-          - /mnt/storage/deluge:/config
-          - /mnt/storage/torrents:/media/torrents
-        ports:
-          - 8112:8112
-          - 6881:6881
-          - 6881:6881/udp
-          - 58846:58846
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      prowlarr:
-        image: lscr.io/linuxserver/prowlarr:latest
-        container_name: prowlarr
-        environment:
-          - PUID=904
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/prowlarr:/config
-        ports:
-          - 9696:9696
-        networks:
-          - media-network
-        restart: unless-stopped
-
-      mealie:
-        image: ghcr.io/mealie-recipes/mealie:v3.11.0
-        container_name: mealie
-        ports:
-          - 9925:9000
-        deploy:
-          resources:
-            limits:
-              memory: 512M
-        volumes:
-          - /mnt/storage/mealie:/app/data/
-        environment:
-          ALLOW_SIGNUP: "false"
-          PUID: 907
-          PGID: 2010
-          TZ: America/Toronto
-          BASE_URL: https://recettes.grosluxe.ca
-          DAILY_SCHEDULE_TIME: 23:30
-          TOKEN_TIME: 4800
-        restart: unless-stopped
-        networks:
-          - media-network
-
-    volumes:
-      model-cache:
-  '';
-
-  # Systemd service to manage docker-compose (depends on certificates)
-  systemd.services.media-server = {
-    description = "Media Server Docker Compose";
+  # Systemd service to manage caddy and the media-network docker network
+  systemd.services.cia-server = {
+    description = "CIA Server Docker Compose";
     after = [ "docker.service" "network-online.target" ];
     wants = [ "network-online.target" ];
     requires = [ "docker.service" ];
@@ -583,60 +218,28 @@
       Type = "oneshot";
       RemainAfterExit = true;
       WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml up -d";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml down";
-      ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml restart";
+      ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml up -d";
+      ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml down";
+      ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml restart";
       TimeoutStartSec = 300;
     };
+  };
 
-    environment = {
-      COMPOSE_PROJECT_NAME = "media-server";
+  systemd.services."config-backup" = {
+    description = "Backup app configs and databases";
+    path = [ pkgs.bash pkgs.borgbackup ];
+    serviceConfig = {
+      User = "hyftar";
+      ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh apps'";
     };
   };
 
-  systemd.services = {
-    "config-backup" = {
-      description = "Backup app configs and databases";
-      path = [
-        pkgs.bash
-        pkgs.borgbackup
-      ];
-      serviceConfig = {
-        User = "hyftar";
-        ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh apps'";
-      };
-    };
-
-    "immich-backup" = {
-      description = "Backup immich uploads";
-      path = [
-        pkgs.bash
-        pkgs.borgbackup
-      ];
-      serviceConfig = {
-        User = "hyftar";
-        ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh immich'";
-      };
-    };
-  };
-
-  systemd.timers = {
-    "config-backup" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "*-*-* 05:00:00";
-        Persistent = true;
-        AccuracySec = "1h";
-      };
-    };
-
-    "immich-backup" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "*-*-* 03:00:00";
-        Persistent = true;
-        AccuracySec = "1h";
-      };
+  systemd.timers."config-backup" = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 05:00:00";
+      Persistent = true;
+      AccuracySec = "1h";
     };
   };
 
