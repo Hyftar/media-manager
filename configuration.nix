@@ -92,6 +92,16 @@
         ];
       };
 
+      tugtainer = {
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        description = "Tugtainer docker manager user";
+        group = "tugtainer";
+        extraGroups = [ "docker" ];
+        uid = 908;
+      };
+
       emby = {
         isSystemUser = true;
         isNormalUser = false;
@@ -176,6 +186,9 @@
 
     "Z /mnt/media/ 0770 hyftar media -" # Recursively set permissions
 
+    "d /mnt/storage/tugtainer 0770 tugtainer media -"
+    "Z /mnt/storage/tugtainer 0770 tugtainer media -"
+
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
@@ -231,6 +244,11 @@
       }
     }
 
+    docker.grosluxe.ca {
+      import secure_headers
+      reverse_proxy
+    }
+
     emby.grosluxe.ca {
       import secure_headers
       reverse_proxy emby:8096
@@ -279,6 +297,20 @@
     DB_USERNAME=postgres
     DB_DATABASE_NAME=immich
     # == End Immich config ==
+  '';
+
+  environment.etc."docker-compose/docker-compose.tugtainer.yml".text = ''
+    services:
+      tugtainer:
+        image: quenary/tugtainer:latest
+        container_name: tugtainer
+        restart: unless-stopped
+        user: 908:2005
+        environment:
+          - PORT=5678
+        volumes:
+          - /mnt/storage/tugtainer:/tugtainer
+          - /var/run/docker.sock:/var/run/docker.sock:ro
   '';
 
   # Create docker-compose configuration
@@ -539,9 +571,9 @@
       Type = "oneshot";
       RemainAfterExit = true;
       WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -d";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose down";
-      ExecReload = "${pkgs.docker-compose}/bin/docker-compose restart";
+      ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -f docker-compose.tugtainer.yml -d";
+      ExecStop = "${pkgs.docker-compose}/bin/docker-compose  -f docker-compose.tugtainer.yml down";
+      ExecReload = "${pkgs.docker-compose}/bin/docker-compose  -f docker-compose.tugtainer.yml restart";
       TimeoutStartSec = 300;
     };
 
@@ -549,21 +581,6 @@
       COMPOSE_PROJECT_NAME = "media-server";
     };
   };
-
-  systemd.services = {
-    "media-server-pull" = {
-      description = "Pull latest Docker images for media server";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-        WorkingDirectory = "/etc/docker-compose";
-        ExecStart = "${pkgs.docker-compose}/bin/docker-compose pull";
-        ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl stop media-server && ${pkgs.systemd}/bin/systemctl start media-server'";
-      };
-    };
 
     "config-backup" = {
       description = "Backup app configs and databases";
@@ -591,16 +608,6 @@
   };
 
   systemd.timers = {
-    "media-server-pull" = {
-      description = "Timer to pull latest Docker images for the media server daily at 2:00 AM";
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "*-*-* 02:00:00";
-        Persistent = true;
-        AccuracySec = "1h";
-      };
-    };
-
     "config-backup" = {
       wantedBy = [ "timers.target" ];
       timerConfig = {
