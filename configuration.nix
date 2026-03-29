@@ -315,6 +315,8 @@
         volumes:
           - /mnt/storage/tugtainer:/tugtainer
           - /var/run/docker.sock:/var/run/docker.sock:ro
+        networks:
+          - media-network
   '';
 
   # Create docker-compose configuration
@@ -575,9 +577,9 @@
       Type = "oneshot";
       RemainAfterExit = true;
       WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose up -f docker-compose.tugtainer.yml -d";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose  -f docker-compose.tugtainer.yml down";
-      ExecReload = "${pkgs.docker-compose}/bin/docker-compose  -f docker-compose.tugtainer.yml restart";
+      ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml up -d";
+      ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml down";
+      ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.tugtainer.yml restart";
       TimeoutStartSec = 300;
     };
 
