@@ -1,9 +1,10 @@
 { config, pkgs, ... }:
 {
   imports = [
-    ./media.nix
-    ./immich.nix
-    ./mealie.nix
+    ./modules/media.nix
+    ./modules/immich.nix
+    ./modules/mealie.nix
+    ./modules/backup.nix
   ];
 
   system.stateVersion = "25.05";
@@ -223,24 +224,6 @@
     };
   };
 
-  systemd.services."config-backup" = {
-    description = "Backup app configs and databases";
-    path = [ pkgs.bash pkgs.borgbackup ];
-    serviceConfig = {
-      User = "hyftar";
-      ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh apps'";
-    };
-  };
-
-  systemd.timers."config-backup" = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 05:00:00";
-      Persistent = true;
-      AccuracySec = "1h";
-    };
-  };
-
   # Install required packages
   environment.systemPackages = with pkgs; [
     borgbackup
@@ -251,7 +234,6 @@
     htop
     curl
     wget
-    nvidia-docker
     neovim
     libva-utils
     git
@@ -259,9 +241,10 @@
 
   virtualisation.docker = {
     enable = true;
-    enableNvidia = true;
     enableOnBoot = true;
   };
+
+  hardware.nvidia-container-toolkit.enable = true;
 
   nixpkgs.config.packageOverrides = pkgs: {
       nvidia-container-toolkit = pkgs.nvidia-container-toolkit.overrideAttrs (oldAttrs: {

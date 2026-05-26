@@ -53,14 +53,14 @@
         env_file:
           - /etc/docker-compose/.env
         ports:
-          - '2283:2283'
+          - 2283:2283
         depends_on:
           - redis
           - database
         restart: unless-stopped
         devices:
           - /dev/dri:/dev/dri
-        runtime: nvidia
+          - nvidia.com/gpu=all
         networks:
           - cia-network
         healthcheck:
@@ -118,21 +118,4 @@
     };
   };
 
-  systemd.services."immich-backup" = {
-    description = "Backup immich uploads";
-    path = [ pkgs.bash pkgs.borgbackup ];
-    serviceConfig = {
-      User = "hyftar";
-      ExecStart = "${pkgs.bash}/bin/bash -c '/mnt/storage/hyftar/Scripts/backup.sh immich'";
-    };
-  };
-
-  systemd.timers."immich-backup" = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 03:00:00";
-      Persistent = true;
-      AccuracySec = "1h";
-    };
-  };
 }

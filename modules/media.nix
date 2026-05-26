@@ -92,8 +92,11 @@
           - UID=900
           - GID=2005
           - GIDLIST=2005
-          - NVIDIA_VISIBLE_DEVICES=all
-          - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+          # Emby is Alpine/musl; the NVIDIA CDI `update-ldcache` hook can't
+          # populate a non-existent ld.so.cache, so point the loader at the
+          # host driver libs directly. /run/opengl-driver/lib stays stable
+          # across driver upgrades.
+          - LD_LIBRARY_PATH=/run/opengl-driver/lib:/lib:/system
         volumes:
           - /mnt/storage/emby/backups:/backups
           - /mnt/storage/emby/config:/config
@@ -107,7 +110,7 @@
           - 8920:8920
         devices:
           - /dev/dri:/dev/dri
-        runtime: nvidia
+          - nvidia.com/gpu=all
         networks:
           - cia-network
 
