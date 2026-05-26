@@ -20,6 +20,7 @@
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
+    "d /mnt/storage/immich/model-cache 0770 immich immich -"
     "d /mnt/storage/videos 0770 immich immich -"
   ];
 
@@ -60,6 +61,24 @@
         restart: unless-stopped
         devices:
           - /dev/dri:/dev/dri
+          - nvidia.com/gpu=all
+        networks:
+          - cia-network
+        healthcheck:
+          disable: false
+
+      immich-machine-learning:
+        container_name: immich_machine_learning
+        group_add:
+          - 2007
+        # `-cuda` variant uses the host nvidia driver via the CDI device below.
+        image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}-cuda
+        volumes:
+          - /mnt/storage/immich/model-cache:/cache
+        env_file:
+          - /etc/docker-compose/.env
+        restart: unless-stopped
+        devices:
           - nvidia.com/gpu=all
         networks:
           - cia-network
