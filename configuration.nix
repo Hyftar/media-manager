@@ -9,7 +9,7 @@
     ./modules/beer-github-runner.nix
   ];
 
-  system.stateVersion = "25.05";
+  system.stateVersion = "26.05";
 
   boot.loader.grub = {
     enable = true;
@@ -254,18 +254,6 @@
   };
 
   hardware.nvidia-container-toolkit.enable = true;
-
-  nixpkgs.config.packageOverrides = pkgs: {
-      nvidia-container-toolkit = pkgs.nvidia-container-toolkit.overrideAttrs (oldAttrs: {
-        version = "1.17.6";
-        src = pkgs.fetchFromGitHub {
-          owner = "NVIDIA";
-          repo = "nvidia-container-toolkit";
-          rev = "v1.17.6";
-          sha256 = "sha256-MQQTQ6AaoA4VIAT7YPo3z6UbZuKHjOvu9sW2975TveM=";
-        };
-      });
-    };
 
   nix.settings.download-buffer-size = 1024 * 1024 * 1024; # 1GB buffer size
 }
