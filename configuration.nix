@@ -5,6 +5,8 @@
     ./modules/immich.nix
     ./modules/mealie.nix
     ./modules/backup.nix
+    ./modules/beer.nix
+    ./modules/beer-github-runner.nix
   ];
 
   system.stateVersion = "25.05";
@@ -164,6 +166,11 @@
       import secure_headers
       reverse_proxy mealie:9000
     }
+
+    beer.grosluxe.ca {
+      import secure_headers
+      reverse_proxy host.docker.internal:8337
+    }
   '';
 
   environment.etc."docker-compose/docker-compose.yml".text = ''
@@ -181,6 +188,8 @@
         ports:
           - 80:80
           - 443:443
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
         volumes:
           - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
           - /mnt/storage/caddy/data:/data
