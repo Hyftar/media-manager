@@ -5,7 +5,6 @@
     ./modules/immich.nix
     ./modules/mealie.nix
     ./modules/backup.nix
-    ./modules/beer.nix
     ./modules/beer-github-runner.nix
   ];
 
@@ -166,11 +165,6 @@
     recettes.grosluxe.ca {
       import secure_headers
       reverse_proxy mealie:9000
-    }
-
-    beer.grosluxe.ca {
-      import secure_headers
-      reverse_proxy host.docker.internal:8337
     }
   '';
 
