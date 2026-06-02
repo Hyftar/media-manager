@@ -9,7 +9,7 @@
     ./modules/beer-github-runner.nix
   ];
 
-  system.stateVersion = "26.05";
+  system.stateVersion = "25.11";
 
   boot.loader.grub = {
     enable = true;
@@ -84,6 +84,7 @@
         description = "Bark Barré";
         home = "/mnt/bark_backup/bark";
         group = "bark";
+        extraGroups = [ "media" ];
         openssh.authorizedKeys.keys = [
           "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID5HeefY97S3ZZS5qpZXHjSZgyuqFj+vgq8nMInzPds1"
         ];
