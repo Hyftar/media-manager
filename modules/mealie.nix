@@ -31,7 +31,7 @@
         deploy:
           resources:
             limits:
-              memory: 512M
+              memory: 2048M
         volumes:
           - /mnt/storage/mealie:/app/data/
         environment:

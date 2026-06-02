@@ -228,7 +228,7 @@
       ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml up -d";
       ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml down";
       ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml restart";
-      TimeoutStartSec = 300;
+      TimeoutStartSec = 600;
       Restart = "on-abnormal";
       RestartSec = 25;
     };

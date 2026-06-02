@@ -3,11 +3,11 @@ let
   appUser = "beer_tracker";
   appGroup = "beer_tracker";
 
-  beerTrackerVersion = "0.1.0";
+  beerTrackerVersion = "0.1.1";
   beerTrackerAppName = "beer_tracker";   # must match :app in mix.exs
   beerTrackerRelease = pkgs.fetchurl {
     url = "https://github.com/Hyftar/beer_tracker/releases/download/v${beerTrackerVersion}/${beerTrackerAppName}-${beerTrackerVersion}.tar.gz";
-    hash = "sha256-0GSjhxE5AIJD9YMw0DVmt8P3fNCoYn1TtfYCxxclYHo=";
+    hash = "sha256-GCGAywRL77PuLhQt1DNsNYR+wP8V4GtlIXuzhOuxVV8=";
   };
 
   beerTrackerDir = pkgs.runCommand "beer-tracker-release" { } ''

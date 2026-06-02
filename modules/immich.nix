@@ -133,7 +133,7 @@
       ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.immich.yml up -d";
       ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.immich.yml down";
       ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.immich.yml restart";
-      TimeoutStartSec = 300;
+      TimeoutStartSec = 600;
     };
   };
 

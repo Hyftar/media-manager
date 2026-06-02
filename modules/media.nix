@@ -228,7 +228,7 @@
       ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml up -d";
       ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml down";
       ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml restart";
-      TimeoutStartSec = 300;
+      TimeoutStartSec = 600;
     };
   };
 }
