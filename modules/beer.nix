@@ -92,12 +92,15 @@ in
     }];
   };
 
-  # Sets the DB password and enables the TimescaleDB extension on first boot.
-  # Re-runs on subsequent boots but ALTER USER is idempotent.
+  # Sets the beer_tracker role's password (ensureUsers creates the role but no
+  # password, and the app connects over TCP needing one) and enables TimescaleDB.
+  # Ordered after postgresql-setup.service — that unit, not postgresql.service,
+  # provisions the database/role via ensureDatabases/ensureUsers. Re-runs each
+  # boot; both statements are idempotent.
   systemd.services.beer-tracker-db-init = {
     description = "Beer Tracker PostgreSQL initialisation";
-    after = [ "postgresql.service" ];
-    requires = [ "postgresql.service" ];
+    after = [ "postgresql.service" "postgresql-setup.service" ];
+    requires = [ "postgresql.service" "postgresql-setup.service" ];
     wantedBy = [ "multi-user.target" ];
     path = [ config.services.postgresql.package ];   # provides psql
     serviceConfig = {
@@ -105,8 +108,12 @@ in
       RemainAfterExit = true;
       User = "postgres";
       ExecStart = pkgs.writeShellScript "beer-tracker-db-init" ''
-        psql -d beer_tracker -c "ALTER USER ${appUser} WITH PASSWORD '$(cat ${config.sops.secrets."beer-tracker/db_password".path})';"
-        psql -d beer_tracker -c "CREATE EXTENSION IF NOT EXISTS timescaledb;"
+        set -euo pipefail
+        pw="$(cat ${config.sops.secrets."beer-tracker/db_password".path})"
+        # Pipe SQL via stdin so the password never lands in a process's argv.
+        printf "ALTER USER %s WITH PASSWORD '%s';\nCREATE EXTENSION IF NOT EXISTS timescaledb;\n" \
+          "${appUser}" "$pw" \
+          | psql -v ON_ERROR_STOP=1 -d beer_tracker
       '';
     };
   };
