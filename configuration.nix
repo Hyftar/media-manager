@@ -5,7 +5,6 @@
     ./modules/immich.nix
     ./modules/mealie.nix
     ./modules/backup.nix
-    ./modules/beer-github-runner.nix
   ];
 
   system.stateVersion = "25.11";
