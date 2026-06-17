@@ -173,7 +173,7 @@
           - cia-network
 
       deluge:
-        image: lscr.io/linuxserver/deluge:2.1.1
+        image: lscr.io/linuxserver/deluge:latest
         container_name: deluge
         restart: unless-stopped
         environment:
