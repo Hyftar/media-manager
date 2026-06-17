@@ -167,6 +167,12 @@
     }
   '';
 
+  sops.secrets."tugtainer/agent_secret".sopsFile = ./secrets/tugtainer.yaml;
+
+  sops.templates."tugtainer.env".content = ''
+    AGENT_SECRET=${config.sops.placeholder."tugtainer/agent_secret"}
+  '';
+
   environment.etc."docker-compose/docker-compose.yml".text = ''
     name: cia-server
 
@@ -202,6 +208,8 @@
         volumes:
           - /mnt/storage/tugtainer:/tugtainer
           - /var/run/docker.sock:/var/run/docker.sock:ro
+        env_file:
+          - ${config.sops.templates."tugtainer.env".path}
         networks:
           - cia-network
   '';
