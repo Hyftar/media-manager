@@ -30,7 +30,7 @@
     DB_DATA_LOCATION=/mnt/storage/immich/data
 
     TZ=America/Toronto
-    IMMICH_VERSION=release
+    IMMICH_VERSION=v3
     DB_PASSWORD=postgres
 
     # The values below this line do not need to be changed
