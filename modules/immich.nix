@@ -20,7 +20,6 @@
     "d /mnt/storage/immich 0770 immich immich -"
     "d /mnt/storage/immich/upload 0770 immich immich -"
     "d /mnt/storage/immich/data 0770 immich immich -"
-    "d /mnt/storage/immich/model-cache 0770 immich immich -"
     "d /mnt/storage/videos 0770 immich immich -"
   ];
 
@@ -67,29 +66,11 @@
         healthcheck:
           disable: false
 
-      immich-machine-learning:
-        container_name: immich_machine_learning
-        group_add:
-          - 2007
-        # `-cuda` variant uses the host nvidia driver via the CDI device below.
-        image: ghcr.io/immich-app/immich-machine-learning:''${IMMICH_VERSION:-release}-cuda
-        volumes:
-          - /mnt/storage/immich/model-cache:/cache
-        env_file:
-          - /etc/docker-compose/.env
-        restart: unless-stopped
-        devices:
-          - nvidia.com/gpu=all
-        networks:
-          - cia-network
-        healthcheck:
-          disable: false
-
       redis:
         container_name: immich_redis
         group_add:
           - 2007
-        image: docker.io/valkey/valkey:9@sha256:3eeb09785cd61ec8e3be35f8804c8892080f3ca21934d628abc24ee4ed1698f6
+        image: docker.io/valkey/valkey:9@sha256:4963247afc4cd33c7d3b2d2816b9f7f8eeebab148d29056c2ca4d7cbc966f2d9
         healthcheck:
           test: redis-cli ping || exit 1
         networks:
@@ -100,7 +81,7 @@
         container_name: immich_postgres
         group_add:
           - 2007
-        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+        image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
         environment:
           POSTGRES_PASSWORD: ''${DB_PASSWORD}
           POSTGRES_USER: ''${DB_USERNAME}
@@ -111,6 +92,7 @@
           - ''${DB_DATA_LOCATION}:/var/lib/postgresql/data
         networks:
           - cia-network
+        shm_size: 128mb
         restart: unless-stopped
 
     networks:

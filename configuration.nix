@@ -255,7 +255,5 @@
     enableOnBoot = true;
   };
 
-  hardware.nvidia-container-toolkit.enable = true;
-
   nix.settings.download-buffer-size = 1024 * 1024 * 1024; # 1GB buffer size
 }
