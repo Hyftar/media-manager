@@ -43,7 +43,7 @@
   networking.firewall = {
     enable = true;
     allowedUDPPorts = [ 6881 ];
-    allowedTCPPorts = [ 22 80 443 6881 58846 ]; # SSH, HTTP, HTTPS, Deluge
+    allowedTCPPorts = [ 22 80 443 2377 6881 58846 ]; # SSH, HTTP, HTTPS, Deluge
   };
 
   users = {
@@ -235,6 +235,19 @@
     };
   };
 
+  systemd.services.docker-swarm-init = {
+      description = "Initialize single-node Docker Swarm";
+      after = [ "docker.service" ];
+      requires = [ "docker.service" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
+      script = ''
+        ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' \
+          | grep -q active \
+          || ${pkgs.docker}/bin/docker swarm init 192.168.0.50
+      '';
+    };
+
   # Install required packages
   environment.systemPackages = with pkgs; [
     borgbackup
@@ -253,6 +266,11 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+      flags = [ "--all" "--filter" "until=168h"];
+    };
   };
 
   nix.settings.download-buffer-size = 1024 * 1024 * 1024; # 1GB buffer size
