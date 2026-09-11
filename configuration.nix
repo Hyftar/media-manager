@@ -165,6 +165,11 @@
       import secure_headers
       reverse_proxy mealie:9000
     }
+
+    bingo.grosluxe.ca {
+      import secure_headers
+      reverse_proxy yabet_app:4000
+    }
   '';
 
   sops.secrets."tugtainer/agent_secret".sopsFile = ./secrets/tugtainer.yaml;
@@ -179,6 +184,9 @@
     networks:
       cia-network:
         driver: bridge
+      cia-overlay:
+        external: true
+        name: cia-overlay
 
     services:
       caddy:
@@ -196,6 +204,7 @@
           - /mnt/storage/caddy/config:/config
         networks:
           - cia-network
+          - cia-overlay
 
       tugtainer:
         image: quenary/tugtainer:latest
@@ -217,9 +226,9 @@
   # Systemd service to manage caddy and the media-network docker network
   systemd.services.cia-server = {
     description = "CIA Server Docker Compose";
-    after = [ "docker.service" "docker.socket" "network-online.target" ];
+    after = [ "docker.service" "docker.socket" "docker-swarm-init.service" "network-online.target" ];
     wants = [ "network-online.target" ];
-    requires = [ "docker.service" "docker.socket" ];
+    requires = [ "docker.service" "docker.socket" "docker-swarm-init.service" ];
     wantedBy = [ "multi-user.target" ];
 
     serviceConfig = {
@@ -244,7 +253,13 @@
       script = ''
         ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' \
           | grep -q active \
-          || ${pkgs.docker}/bin/docker swarm init 192.168.0.50
+          || ${pkgs.docker}/bin/docker swarm init --advertise-addr 192.168.0.50
+
+        # Attachable so the compose-managed Caddy container can join it and
+        # resolve Swarm service names (e.g. yabet_app) via the embedded DNS
+        ${pkgs.docker}/bin/docker network inspect cia-overlay >/dev/null 2>&1 \
+          || ${pkgs.docker}/bin/docker network create \
+               --driver overlay --attachable cia-overlay
       '';
     };
 
