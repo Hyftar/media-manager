@@ -170,6 +170,10 @@
       import secure_headers
       reverse_proxy yabet_app:4000
     }
+
+    heroshop-dev.rumandcode.io {
+      reverse_proxy 192.168.0.13:3000
+    }
   '';
 
   sops.secrets."tugtainer/agent_secret".sopsFile = ./secrets/tugtainer.yaml;
