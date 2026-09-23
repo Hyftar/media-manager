@@ -63,6 +63,10 @@
       caddy = {
         gid = 2009;
       };
+
+      arcane = {
+        gid = 2011;
+      };
     };
 
     users = {
@@ -98,12 +102,20 @@
         uid = 902;
       };
 
+      arcane = {
+        description = "Arcane user";
+        isSystemUser = true;
+        isNormalUser = false;
+        createHome = false;
+        group = "arcane";
+        uid = 908;
+      };
+
     };
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/tugtainer 0770 hyftar media -"
-    "Z /mnt/storage/tugtainer 0770 hyftar media -"
+    "d /mnt/storage/arcane 0770 arcane arcane -"
 
     "d /mnt/storage/caddy 0770 caddy caddy -"
     "Z /mnt/storage/caddy 0770 caddy caddy -"
@@ -133,7 +145,7 @@
 
     docker.grosluxe.ca {
       import secure_headers
-      reverse_proxy tugtainer:80
+      reverse_proxy arcane:3552
     }
 
     emby.grosluxe.ca {
@@ -176,10 +188,10 @@
     }
   '';
 
-  sops.secrets."tugtainer/agent_secret".sopsFile = ./secrets/tugtainer.yaml;
+  sops.secrets."arcane/encryption_key".sopsFile = ./secrets/arcane.yaml;
 
-  sops.templates."tugtainer.env".content = ''
-    AGENT_SECRET=${config.sops.placeholder."tugtainer/agent_secret"}
+  sops.templates."arcane.env".content = ''
+    ENCRYPTION_KEY=${config.sops.placeholder."arcane/encryption_key"}
   '';
 
   environment.etc."docker-compose/docker-compose.yml".text = ''
@@ -210,19 +222,24 @@
           - cia-network
           - cia-overlay
 
-      tugtainer:
-        image: quenary/tugtainer:latest
-        container_name: tugtainer
+      arcane:
+        image: ghcr.io/getarcaneapp/manager:latest
+        container_name: arcane
         restart: unless-stopped
         ports:
-          - 5678:80
-        group_add:
-          - ${toString config.users.groups.docker.gid}
+          - 5678:3552
+        cgroup: host
         volumes:
-          - /mnt/storage/tugtainer:/tugtainer
-          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - /mnt/storage/arcane:/app/data
+          - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+          APP_URL: https://docker.grosluxe.ca
+          PUID: ${toString config.users.users.arcane.uid}
+          PGID: ${toString config.users.groups.arcane.gid}
+          TZ: America/Toronto
+          ANALYTICS_DISABLED: "true"
         env_file:
-          - ${config.sops.templates."tugtainer.env".path}
+          - ${config.sops.templates."arcane.env".path}
         networks:
           - cia-network
   '';
