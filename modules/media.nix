@@ -77,6 +77,9 @@
     "d /mnt/storage/torrents 0770 deluge media -"
     "Z /mnt/storage/torrents 0770 deluge media -"
 
+    "d /mnt/storage/movies_intake 0777 deluge media -"
+    "Z /mnt/storage/movies_intake 0777 deluge media -"
+
     "d /mnt/storage/jellyseerr 0770 node media -"
     "Z /mnt/storage/jellyseerr 0770 node media -"
   ];
@@ -126,6 +129,7 @@
           - /mnt/storage/sonarr:/config
           - /mnt/media:/media
           - /mnt/storage/torrents:/media/torrents
+          - /mnt/storage/movies_intake:/media/series_intake
         ports:
           - 8989:8989
         networks:
@@ -143,6 +147,7 @@
           - /mnt/storage/radarr:/config
           - /mnt/media:/media
           - /mnt/storage/torrents:/media/torrents
+          - /mnt/storage/movies_intake:/media/movies_intake
         ports:
           - 7878:7878
         networks:

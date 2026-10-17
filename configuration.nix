@@ -3,7 +3,7 @@
   imports = [
     ./modules/media.nix
     ./modules/immich.nix
-    ./modules/mealie.nix
+    # ./modules/mealie.nix
     ./modules/backup.nix
   ];
 
