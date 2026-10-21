@@ -118,7 +118,7 @@
           - cia-network
 
       sonarr:
-        image: lscr.io/linuxserver/sonarr:latest
+        image: ghcr.io/linuxserver/sonarr:latest
         container_name: sonarr
         restart: unless-stopped
         environment:
@@ -136,7 +136,7 @@
           - cia-network
 
       radarr:
-        image: lscr.io/linuxserver/radarr:latest
+        image: ghcr.io/linuxserver/radarr:latest
         container_name: radarr
         restart: unless-stopped
         environment:
@@ -178,7 +178,7 @@
           - cia-network
 
       deluge:
-        image: lscr.io/linuxserver/deluge:latest
+        image: ghcr.io/linuxserver/deluge:latest
         container_name: deluge
         restart: unless-stopped
         environment:
@@ -199,7 +199,7 @@
           - cia-network
 
       prowlarr:
-        image: lscr.io/linuxserver/prowlarr:latest
+        image: ghcr.io/linuxserver/prowlarr:latest
         container_name: prowlarr
         restart: unless-stopped
         environment:

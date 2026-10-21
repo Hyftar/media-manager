@@ -298,11 +298,6 @@
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
-      flags = [ "--all" "--filter" "until=168h"];
-    };
   };
 
   nix.settings.download-buffer-size = 1024 * 1024 * 1024; # 1GB buffer size
