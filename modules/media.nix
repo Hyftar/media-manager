@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, ... }:
 {
   users.groups = {
     emby = { gid = 2008; };
@@ -33,13 +33,31 @@
       uid = 904;
     };
 
+    prowlarr = {
+      isSystemUser = true;
+      isNormalUser = false;
+      createHome = false;
+      description = "Prowlarr user";
+      group = "media";
+      uid = 905;
+    };
+
     deluge = {
       isSystemUser = true;
       isNormalUser = false;
       createHome = false;
       description = "Deluge user";
       group = "media";
-      uid = 905;
+      uid = 906;
+    };
+
+    qbittorrent = {
+      isSystemUser = true;
+      isNormalUser = false;
+      createHome = false;
+      description = "qBittorrent user";
+      group = "media";
+      uid = 909;
     };
 
     jellyseerr = {
@@ -48,7 +66,7 @@
       createHome = false;
       description = "seerr user";
       group = "media";
-      uid = 906;
+      uid = 910;
     };
   };
 
@@ -58,8 +76,8 @@
     "d /mnt/media/animes 0770 hyftar media -"
     "Z /mnt/media/ 0770 hyftar media -"
 
-    "d /mnt/storage/emby 0750 emby emby -"
-    "d /mnt/storage/emby/backups 0750 emby emby -"
+    "d /mnt/storage/emby 0750 emby media -"
+    "d /mnt/storage/emby/backups 0750 emby media -"
     "Z /mnt/storage/emby/ 0750 emby media -"
 
     "d /mnt/storage/sonarr 0770 sonarr media -"
@@ -68,172 +86,38 @@
     "d /mnt/storage/radarr 0770 radarr media -"
     "Z /mnt/storage/radarr 0770 radarr media -"
 
-    "d /mnt/storage/prowlarr 0770 radarr media -"
-    "Z /mnt/storage/prowlarr 0770 radarr media -"
+    "d /mnt/storage/prowlarr 0770 prowlarr media -"
+    "Z /mnt/storage/prowlarr 0770 prowlarr media -"
 
+    # Former Deluge config, kept until the switch to qBittorrent is confirmed.
     "d /mnt/storage/deluge 0770 deluge media -"
     "Z /mnt/storage/deluge 0770 deluge media -"
 
-    "d /mnt/storage/torrents 0770 deluge media -"
-    "Z /mnt/storage/torrents 0770 deluge media -"
+    "d /mnt/storage/qbittorrent 0770 qbittorrent media -"
+    "Z /mnt/storage/qbittorrent 0770 qbittorrent media -"
 
-    "d /mnt/storage/movies_intake 0777 deluge media -"
-    "Z /mnt/storage/movies_intake 0777 deluge media -"
+    "d /mnt/storage/torrents 0770 qbittorrent media -"
+    "Z /mnt/storage/torrents 0770 qbittorrent media -"
+
+    "d /mnt/storage/movies_intake 0777 qbittorrent media -"
+    "Z /mnt/storage/movies_intake 0777 qbittorrent media -"
 
     "d /mnt/storage/jellyseerr 0770 node media -"
     "Z /mnt/storage/jellyseerr 0770 node media -"
   ];
 
-  environment.etc."docker-compose/docker-compose.media-service.yml".text = ''
-    name: media-service
-    services:
-      emby:
-        image: emby/embyserver:beta
-        container_name: emby
-        restart: unless-stopped
-        environment:
-          - UID=900
-          - GID=2005
-          - GIDLIST=2005
-          # Emby is Alpine/musl; the NVIDIA CDI `update-ldcache` hook can't
-          # populate a non-existent ld.so.cache, so point the loader at the
-          # host driver libs directly. /run/opengl-driver/lib stays stable
-          # across driver upgrades.
-          - LD_LIBRARY_PATH=/run/opengl-driver/lib:/lib:/system
-        volumes:
-          - /mnt/storage/emby/backups:/backups
-          - /mnt/storage/emby/config:/config
-          - /mnt/storage/books:/media/books
-          - /mnt/media/movies:/media/movies
-          - /mnt/media/series:/media/series
-          - /mnt/media/animes:/media/animes
-          - /etc/localtime:/etc/localtime:ro
-        ports:
-          - 8096:8096
-          - 8920:8920
-        devices:
-          - /dev/dri:/dev/dri
-          - nvidia.com/gpu=all
-        networks:
-          - cia-network
-
-      sonarr:
-        image: ghcr.io/linuxserver/sonarr:latest
-        container_name: sonarr
-        restart: unless-stopped
-        environment:
-          - PUID=903
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/sonarr:/config
-          - /mnt/media:/media
-          - /mnt/storage/torrents:/media/torrents
-          - /mnt/storage/movies_intake:/media/series_intake
-        ports:
-          - 8989:8989
-        networks:
-          - cia-network
-
-      radarr:
-        image: ghcr.io/linuxserver/radarr:latest
-        container_name: radarr
-        restart: unless-stopped
-        environment:
-          - PUID=904
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/radarr:/config
-          - /mnt/media:/media
-          - /mnt/storage/torrents:/media/torrents
-          - /mnt/storage/movies_intake:/media/movies_intake
-        ports:
-          - 7878:7878
-        networks:
-          - cia-network
-
-      seerr:
-        image: ghcr.io/seerr-team/seerr:latest
-        init: true
-        container_name: seerr
-        restart: unless-stopped
-        environment:
-          - LOG_LEVEL=error
-          - PUID=906
-          - PGID=2005
-          - TZ=America/Toronto
-          - PORT=5055
-        ports:
-          - 5055:5055
-        volumes:
-          - /mnt/storage/jellyseerr:/app/config
-        healthcheck:
-          test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
-          start_period: 20s
-          timeout: 3s
-          interval: 15s
-          retries: 3
-        networks:
-          - cia-network
-
-      deluge:
-        image: ghcr.io/linuxserver/deluge:latest
-        container_name: deluge
-        restart: unless-stopped
-        environment:
-          - PUID=905
-          - PGID=2005
-          - UMASK=007
-          - TZ=America/Toronto
-          - DELUGE_LOGLEVEL=error
-        volumes:
-          - /mnt/storage/deluge:/config
-          - /mnt/storage/torrents:/media/torrents
-        ports:
-          - 8112:8112
-          - 6881:6881
-          - 6881:6881/udp
-          - 58846:58846
-        networks:
-          - cia-network
-
-      prowlarr:
-        image: ghcr.io/linuxserver/prowlarr:latest
-        container_name: prowlarr
-        restart: unless-stopped
-        environment:
-          - PUID=904
-          - PGID=2005
-          - TZ=America/Toronto
-        volumes:
-          - /mnt/storage/prowlarr:/config
-        ports:
-          - 9696:9696
-        networks:
-          - cia-network
-
-    networks:
-      cia-network:
-        external: true
-        name: cia-server_cia-network
-  '';
-
-  systemd.services.media = {
-    description = "Media Service Docker Compose";
-    after = [ "docker.service" "network-online.target" "cia-server.service" ];
-    wants = [ "network-online.target" ];
-    requires = [ "docker.service" "cia-server.service" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml up -d";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml down";
-      ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.media-service.yml restart";
-      TimeoutStartSec = 600;
+  cia.stacks.media = {
+    source = ../stacks/media;
+    dependsOn = [ "core" ];
+    env = {
+      TZ = config.time.timeZone;
+      MEDIA_GID = config.users.groups.media.gid;
+      EMBY_UID = config.users.users.emby.uid;
+      SONARR_UID = config.users.users.sonarr.uid;
+      RADARR_UID = config.users.users.radarr.uid;
+      PROWLARR_UID = config.users.users.prowlarr.uid;
+      QBITTORRENT_UID = config.users.users.qbittorrent.uid;
+      SEERR_UID = config.users.users.jellyseerr.uid;
     };
   };
 }

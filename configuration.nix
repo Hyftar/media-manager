@@ -1,9 +1,9 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ./modules/stacks.nix
     ./modules/media.nix
     ./modules/immich.nix
-    # ./modules/mealie.nix
     ./modules/backup.nix
   ];
 
@@ -11,7 +11,9 @@
 
   boot.loader.grub = {
     enable = true;
-    devices = [ "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292" ];
+    devices = [
+      "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292"
+    ];
   };
 
   time.timeZone = "America/Toronto";
@@ -31,7 +33,7 @@
     ignoreIP = [
       "192.168.0.0/16"
     ];
-    bantime = "24h"; # Ban IPs for one day on the first ban
+    bantime = "1h"; # Ban IPs for one day on the first ban
     bantime-increment = {
       enable = true;
       multipliers = "1 2 5 7 14 31 60";
@@ -42,8 +44,18 @@
 
   networking.firewall = {
     enable = true;
-    allowedUDPPorts = [ 6881 ];
-    allowedTCPPorts = [ 22 80 443 2377 6881 58846 ]; # SSH, HTTP, HTTPS, Deluge
+
+    allowedUDPPorts = [
+      6881 # qBittorrent
+    ];
+
+    allowedTCPPorts = [
+      22    # SSH
+      80    # HTTP
+      443   # HTTPS
+      2377  # Swarm
+      6881  # qBittorrent peers
+    ];
   };
 
   users = {
@@ -125,140 +137,23 @@
     "d /var/lib/docker-compose 0750 root root -"
   ];
 
-  environment.etc."caddy/Caddyfile".text = ''
-    {
-      email simonlandry762@gmail.com
-      servers {
-        trusted_proxies static private_ranges
-      }
-    }
-
-    (secure_headers) {
-      header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "SAMEORIGIN"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        -Server
-      }
-    }
-
-    docker.grosluxe.ca {
-      import secure_headers
-      reverse_proxy arcane:3552
-    }
-
-    emby.grosluxe.ca {
-      import secure_headers
-      reverse_proxy emby:8096
-    }
-
-    photos.grosluxe.ca {
-      import secure_headers
-      reverse_proxy immich_server:2283
-    }
-
-    requests.grosluxe.ca {
-      import secure_headers
-      reverse_proxy seerr:5055
-    }
-
-    sonarr.grosluxe.ca {
-      import secure_headers
-      reverse_proxy sonarr:8989
-    }
-
-    radarr.grosluxe.ca {
-      import secure_headers
-      reverse_proxy radarr:7878
-    }
-
-    recettes.grosluxe.ca {
-      import secure_headers
-      reverse_proxy mealie:9000
-    }
-
-    bingo.grosluxe.ca {
-      import secure_headers
-      reverse_proxy yabet_app:4000
-    }
-  '';
-
   sops.secrets."arcane/encryption_key".sopsFile = ./secrets/arcane.yaml;
 
   sops.templates."arcane.env".content = ''
     ENCRYPTION_KEY=${config.sops.placeholder."arcane/encryption_key"}
   '';
 
-  environment.etc."docker-compose/docker-compose.yml".text = ''
-    name: cia-server
-
-    networks:
-      cia-network:
-        driver: bridge
-      cia-overlay:
-        external: true
-        name: cia-overlay
-
-    services:
-      caddy:
-        image: caddy:latest
-        container_name: caddy
-        restart: unless-stopped
-        ports:
-          - 80:80
-          - 443:443
-        extra_hosts:
-          - "host.docker.internal:host-gateway"
-        volumes:
-          - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-          - /mnt/storage/caddy/data:/data
-          - /mnt/storage/caddy/config:/config
-        networks:
-          - cia-network
-          - cia-overlay
-
-      arcane:
-        image: ghcr.io/getarcaneapp/manager:latest
-        container_name: arcane
-        restart: unless-stopped
-        ports:
-          - 5678:3552
-        cgroup: host
-        volumes:
-          - /mnt/storage/arcane:/app/data
-          - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-          APP_URL: https://docker.grosluxe.ca
-          PUID: ${toString config.users.users.arcane.uid}
-          PGID: ${toString config.users.groups.arcane.gid}
-          TZ: America/Toronto
-          ANALYTICS_DISABLED: "true"
-        env_file:
-          - ${config.sops.templates."arcane.env".path}
-        networks:
-          - cia-network
-  '';
-
-  # Systemd service to manage caddy and the media-network docker network
-  systemd.services.cia-server = {
-    description = "CIA Server Docker Compose";
-    after = [ "docker.service" "docker.socket" "docker-swarm-init.service" "network-online.target" ];
-    wants = [ "network-online.target" ];
-    requires = [ "docker.service" "docker.socket" "docker-swarm-init.service" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      WorkingDirectory = "/etc/docker-compose";
-      ExecStart = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml up -d";
-      ExecStop = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml down";
-      ExecReload = "${pkgs.docker-compose}/bin/docker-compose -f docker-compose.yml restart";
-      TimeoutStartSec = 600;
-      Restart = "on-abnormal";
-      RestartSec = 25;
+  cia.stacks.core = {
+    source = ./stacks/core;
+    after = [ "docker-swarm-init.service" ];
+    env = {
+      TZ = config.time.timeZone;
+      ARCANE_UID = config.users.users.arcane.uid;
+      ARCANE_GID = config.users.groups.arcane.gid;
+      STACKS_DIR = config.cia.stacksDirectory;
     };
+    secrets."secrets.env" = config.sops.templates."arcane.env".path;
+    secretsOwner = "arcane";
   };
 
   systemd.services.docker-swarm-init = {
@@ -272,15 +167,12 @@
           | grep -q active \
           || ${pkgs.docker}/bin/docker swarm init --advertise-addr 192.168.0.50
 
-        # Attachable so the compose-managed Caddy container can join it and
-        # resolve Swarm service names (e.g. yabet_app) via the embedded DNS
         ${pkgs.docker}/bin/docker network inspect cia-overlay >/dev/null 2>&1 \
           || ${pkgs.docker}/bin/docker network create \
                --driver overlay --attachable cia-overlay
       '';
     };
 
-  # Install required packages
   environment.systemPackages = with pkgs; [
     borgbackup
     parted
