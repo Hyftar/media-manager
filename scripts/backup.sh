@@ -15,11 +15,16 @@ set -euo pipefail
 
 SECRETS_DIR="${BORG_SECRETS_DIR:-/run/secrets/borg}"
 
+# Data locations, set by modules/backup.nix from cia.paths.
+CONFIG_DIR="${CONFIG_DIR:?CONFIG_DIR is not set}"
+PHOTOS_DIR="${PHOTOS_DIR:?PHOTOS_DIR is not set}"
+
 REMOTE_USER="$(<"${SECRETS_DIR}/remote_user")"
 REMOTE_HOST="$(<"${SECRETS_DIR}/remote_host")"
 SSH_KEY="${SECRETS_DIR}/ssh_key"
 
-export BORG_RSH="ssh -i ${SSH_KEY}"
+# accept-new: the first run on a fresh install has no known_hosts entry yet.
+export BORG_RSH="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=accept-new"
 export BORG_PASSCOMMAND="cat ${SECRETS_DIR}/passphrase"
 
 log() {
@@ -43,11 +48,32 @@ run_backup() {
   local repo_path="$1"
   local keep_last="$2"
   shift 2
-  local paths=("$@")
+
+  # Skip paths that don't exist (yet): borg would otherwise exit with a
+  # warning and fail the whole run.
+  local paths=() path
+  for path in "$@"; do
+    if [[ -e "$path" ]]; then
+      paths+=("$path")
+    else
+      log "Skipping missing path: ${path}"
+    fi
+  done
+  if (( ${#paths[@]} == 0 )); then
+    log "Nothing to back up for ${repo_path}"
+    return 0
+  fi
 
   local repo="${REMOTE_USER}@${REMOTE_HOST}:${repo_path}"
   local archive_name
   archive_name="backup-$(date +%Y-%m-%dT%H:%M:%S)"
+
+  # `borg init` refuses to touch an existing repository, so this only ever
+  # creates new ones.
+  if ! borg info "${repo}" >/dev/null 2>&1; then
+    log "Initialising repository: ${repo}"
+    borg init --encryption=repokey-blake2 --make-parent-dirs "${repo}"
+  fi
 
   log "--- Backing up: ${paths[*]} -> ${repo} ---"
 
@@ -77,29 +103,34 @@ run_backup() {
   log "--- Done: ${repo} ---"
 }
 
+# The new server (i5-14500, NixOS 26.05) writes to its own repositories so it
+# can't prune the old server's archives. The old ones stay in ~/disk1/backups
+# and ~/disk2/immich_backup.
+# Tilde is expanded by the remote SSH shell, not locally.
+# shellcheck disable=SC2088
+REPO_ROOT_1="~/disk1/cia-2026"
+# shellcheck disable=SC2088
+REPO_ROOT_2="~/disk2/cia-2026"
+
 BACKUP="${1:-}"
 
 case "$BACKUP" in
   apps)
     log "===== Starting apps backup ====="
-    # Tilde is expanded by the remote SSH shell, not locally.
-    # shellcheck disable=SC2088
-    run_backup "~/disk1/backups" 30 \
-      "/mnt/storage/sonarr/Backups" \
-      "/mnt/storage/radarr/Backups" \
-      "/mnt/storage/prowlarr/Backups" \
-      "/mnt/storage/emby/backups" \
-      "/mnt/storage/mealie/backups" \
-      "/mnt/storage/jellyseerr/backups"
+    run_backup "${REPO_ROOT_1}/backups" 30 \
+      "${CONFIG_DIR}/sonarr/Backups" \
+      "${CONFIG_DIR}/radarr/Backups" \
+      "${CONFIG_DIR}/prowlarr/Backups" \
+      "${CONFIG_DIR}/emby/backups" \
+      "${CONFIG_DIR}/jellyseerr/backups"
     log "===== Apps backup completed successfully ====="
     ;;
 
   immich)
     log "===== Starting Immich backup ====="
-    # shellcheck disable=SC2088
-    run_backup "~/disk2/immich_backup" 60 \
-      "/mnt/storage/immich/upload" \
-      "/mnt/storage/pictures"
+    run_backup "${REPO_ROOT_2}/immich_backup" 60 \
+      "${PHOTOS_DIR}/immich/upload" \
+      "${PHOTOS_DIR}/pictures"
     log "===== Immich backup completed successfully ====="
     ;;
 

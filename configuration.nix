@@ -1,20 +1,17 @@
 { config, pkgs, ... }:
 {
   imports = [
+    ./modules/hardware.nix
+    ./modules/paths.nix
     ./modules/stacks.nix
     ./modules/media.nix
     ./modules/immich.nix
     ./modules/backup.nix
   ];
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 
-  boot.loader.grub = {
-    enable = true;
-    devices = [
-      "/dev/disk/by-id/ata-WDC_WD1002FAEX-00Z3A0_WD-WCATR9408292"
-    ];
-  };
+  networking.hostName = "cia";
 
   time.timeZone = "America/Toronto";
 
@@ -33,7 +30,7 @@
     ignoreIP = [
       "192.168.0.0/16"
     ];
-    bantime = "1h"; # Ban IPs for one day on the first ban
+    bantime = "1h"; # Ban IPs for one hour on the first ban
     bantime-increment = {
       enable = true;
       multipliers = "1 2 5 7 14 31 60";
@@ -86,7 +83,6 @@
         isNormalUser = true;
         description = "Simon Landry";
         extraGroups = [ "wheel" "docker" "networkmanager" "media" "mealie" "immich" ];
-        home = "/mnt/storage/hyftar";
         openssh.authorizedKeys.keys = [
           "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJVOVgvmbYJpZ+iU/ctEtdQdJPez9hZV0ucOxI0ZkjUJL98A/zLN6s/CvcszgHZfNyWU8ptd4jn2Ynw4PHNm4PQk+5iGdyX2iYCiV3kecFrfqQLVcz0qoBITqGEu2OGmOeIyvf0Xu/A159e+6lHKg1Bco6PBH1AiHr1VAepWUcyzAEk2lIdmhbyHjuBrtbXDEzbvbDwoXW7VCdWms235wzWSo/wcz8y0I5jPMYIbV8FDLT1TbjvocVZZMCnq3b9qlPk0h0WM6RbxOMF6R+je76tMGEFpiqBWkNXURewR6Y2UwEdXa3XUkQods6TKmIXgf9gd61BgjMA3C7oPLSlVKG2DMXTADFOK4z5u+KYB6/dUiaaFkwHaLsO0ck9vtWmay6G0Wyt7Iw9isY5T+yJ9fD1meqfNkQVvPE4opNg7/M5fCl6gAYxXfNOhRUBUsWjJnBwHkCKsjbomAWKh1XechCr84YjtV/HIcOVklmWUA5jtV5WxgT5ap5TlPr2kaGySQ2mzhLpig20dUPpujlEexfWIHrnrvaJ2gRzZPXIHtH32kx7/IJfd0trurWIoDzWKU3uFUuXCu1CLDBfEed+dtFZWk/Zx3wUgqzxG6KZXO1VlZEoqVBWU10DXnmQntLzDT7tGPnauPApAOe9EjZTnLDTjN3Jxg4XPpOcJZRr5pnPQ== simon.landry@rumandcode.io"
         ];
@@ -127,10 +123,10 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/arcane 0770 arcane arcane -"
+    "d ${config.cia.paths.config}/arcane 0770 arcane arcane -"
 
-    "d /mnt/storage/caddy 0770 caddy caddy -"
-    "Z /mnt/storage/caddy 0770 caddy caddy -"
+    "d ${config.cia.paths.config}/caddy 0770 caddy caddy -"
+    "Z ${config.cia.paths.config}/caddy 0770 caddy caddy -"
 
     "Z /mnt/bark_backup 0770 bark bark -"
 
@@ -151,6 +147,7 @@
       ARCANE_UID = config.users.users.arcane.uid;
       ARCANE_GID = config.users.groups.arcane.gid;
       STACKS_DIR = config.cia.stacksDirectory;
+      CONFIG_DIR = config.cia.paths.config;
     };
     secrets."secrets.env" = config.sops.templates."arcane.env".path;
     secretsOwner = "arcane";
@@ -184,6 +181,7 @@
     wget
     neovim
     libva-utils
+    intel-gpu-tools
     git
   ];
 

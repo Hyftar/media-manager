@@ -21,7 +21,7 @@ All of which run in Docker containers, as Docker Compose stacks managed by [Arca
 | -------- | --------------------------- | --------------------- | -------------------------------- |
 | `core`   | `stacks/core/compose.yaml`  | `configuration.nix`   | Caddy (`stacks/core/caddy/`), Arcane |
 | `media`  | `stacks/media/compose.yaml` | `modules/media.nix`   | Emby, Sonarr, Radarr, Prowlarr, qBittorrent, Seerr |
-| `immich` | `stacks/immich/compose.yaml`| `modules/immich.nix`  | Immich server, Valkey, Postgres  |
+| `immich` | `stacks/immich/compose.yaml`| `modules/immich.nix`  | Immich server, machine learning (OpenVINO), Valkey, Postgres |
 
 - The compose files are plain YAML. Values that NixOS owns (uids, gids, paths, timezone) are `${VARIABLES}`, written
   to each stack's `.env` from the `cia.stacks.<name>.env` option (`modules/stacks.nix`). Secrets (Arcane's encryption
@@ -39,15 +39,25 @@ Containers are updated by Arcane (*Environments → Local Docker → Automations
 together with Immich (Valkey, Postgres) carry `com.getarcaneapp.arcane.updater=false`; Arcane still reports updates
 for them but won't install them.
 
-## Drivers
+## Hardware
 
-The nvidia driver version 570.153.02 is installed. This specific version was chosen because later versions were causing
-issues with the system, particularly with the container toolkit.
+The server runs an Intel Core i5-14500 on NixOS 26.05, booting with systemd-boot (UEFI). Emby and Immich transcode on
+the UHD 770 iGPU (Quick Sync) through `/dev/dri`; the host has the iHD VA-API driver and `intel_gpu_top` for checks.
+
+`hardware-configuration.nix` is the file `nixos-generate-config` wrote on the server, kept verbatim (`make
+hardware-config` fetches it). Host-specific settings (boot loader, GPU, data drives) live in `modules/hardware.nix`.
 
 ## Hard Drives
 
-There are four hard drives installed in total, each of which have a specific purpose:
-- `/` -- 1 TB : NixOS install partition & boot / GRUB partition
-- `/mnt/storage` -- 4 TB : Storage for containers configuration files and immich photos and videos
-- `/mnt/media` -- 12 TB : Storage for media files
+Paths are defined once in `modules/paths.nix` (`cia.paths`) and passed to the stacks and the backup script.
+
+- `/` and `/boot` : main drive (see `hardware-configuration.nix`)
+  - `/data/config/<app>` : app configuration and databases, including Immich's Postgres and model cache
+  - `/data/torrents`, `/data/movies_intake` : downloads and the Sonarr/Radarr intake folder
+- `/mnt/photos` -- 4 TB : Immich uploads, pictures and videos (formerly `/mnt/storage`)
+- `/mnt/media` -- 12 TB : movies, series, animes and books
 - `/mnt/bark_backup` -- 4 TB : backup storage for http://bark-barre.ca
+
+The data drives haven't moved to the new machine yet: until `dataDrivesInstalled` is set in `modules/hardware.nix`,
+their mount points are plain directories on the main drive. Anything written there is hidden once the drives are
+mounted over it.

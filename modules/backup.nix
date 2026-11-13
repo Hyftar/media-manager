@@ -9,6 +9,11 @@ let
     text = builtins.readFile ../scripts/backup.sh;
   };
 
+  backupEnv = {
+    CONFIG_DIR = config.cia.paths.config;
+    PHOTOS_DIR = config.cia.paths.photos;
+  };
+
   secretOpts = {
     owner = borgUser;
     mode = "0400";
@@ -32,6 +37,7 @@ in
     description = "Backup app configs and databases";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    environment = backupEnv;
     serviceConfig = {
       Type = "oneshot";
       User = borgUser;
@@ -52,6 +58,7 @@ in
     description = "Backup immich uploads";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    environment = backupEnv;
     serviceConfig = {
       Type = "oneshot";
       User = borgUser;

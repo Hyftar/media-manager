@@ -1,53 +1,35 @@
-{ config, pkgs, ... }:
-{
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.nvidia.acceptLicense = true;
+{ config, lib, pkgs, modulesPath, ...}:
 
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia-container-toolkit.enable = true;
-  hardware.graphics.enable = true;
-  hardware.graphics.enable32Bit = true;
-  hardware.graphics.extraPackages = with pkgs; [
-    nvidia-vaapi-driver
+{
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "ahci"
+    "nvme"
+    "usb_storage"
+    "sd_mod"
   ];
 
-  hardware.nvidia = {
-    nvidiaSettings = false;
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ "kvm-intel" ];
+  boot.extraModulePackages = [ ];
 
-    powerManagement.enable = false;
-    powerManagement.finegrained = false;
-
-    open = false;
-
-    modesetting.enable = true;
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/7cf86934-bf80-4fe5-8df7-527fce1b4176";
+    fsType = "ext4";
   };
 
-  fileSystems = {
-    # Root file system
-    "/" = {
-      device = "/dev/disk/by-label/nixos";
-      fsType = "ext4";
-    };
-
-    # Storage HDD (photos, videos, documents)
-    "/mnt/storage" = {
-      device = "/dev/disk/by-uuid/df617e43-0dd9-4c39-9143-830fbb1d0547";
-      fsType = "ext4";
-      options = [ "defaults" "nofail" ];
-    };
-
-    # Bark Backup HDD (BorgBackup repository)
-    "/mnt/bark_backup" = {
-      device = "/dev/disk/by-partlabel/bark_backup";
-      fsType = "ext4";
-      options = [ "defaults" "nofail" ];
-    };
-
-    # Media HDD (movies, series)
-    "/mnt/media" = {
-      device = "/dev/disk/by-partlabel/media";
-      fsType = "ext4";
-      options = [ "defaults" "nofail" ];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/FD34-5992";
+    fsType = "vfat";
+    options = [ "fmask=0077" "dmask=0077" ];
   };
+
+  swapDevices = [
+    { device = "/dev/disk/by-uuid/dde0c51f-58bd-44c6-8897-5024f2d28efc"; }
+  ];
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

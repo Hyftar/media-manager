@@ -1,4 +1,7 @@
 { config, ... }:
+let
+  paths = config.cia.paths;
+in
 {
   users.groups = {
     emby = { gid = 2008; };
@@ -71,47 +74,49 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/media/series 0770 hyftar media -"
-    "d /mnt/media/movies 0770 hyftar media -"
-    "d /mnt/media/animes 0770 hyftar media -"
-    "Z /mnt/media/ 0770 hyftar media -"
+    "d ${paths.media}/series 0770 hyftar media -"
+    "d ${paths.media}/movies 0770 hyftar media -"
+    "d ${paths.media}/animes 0770 hyftar media -"
+    "d ${paths.media}/books 0770 hyftar media -"
+    "Z ${paths.media}/ 0770 hyftar media -"
 
-    "d /mnt/storage/emby 0750 emby media -"
-    "d /mnt/storage/emby/backups 0750 emby media -"
-    "Z /mnt/storage/emby/ 0750 emby media -"
+    "d ${paths.config}/emby 0770 emby media -"
+    "d ${paths.config}/emby/backups 0770 emby media -"
+    "Z ${paths.config}/emby/ 0770 emby media -"
 
-    "d /mnt/storage/sonarr 0770 sonarr media -"
-    "Z /mnt/storage/sonarr 0770 sonarr media -"
+    "d ${paths.config}/sonarr 0770 sonarr media -"
+    "Z ${paths.config}/sonarr 0770 sonarr media -"
 
-    "d /mnt/storage/radarr 0770 radarr media -"
-    "Z /mnt/storage/radarr 0770 radarr media -"
+    "d ${paths.config}/radarr 0770 radarr media -"
+    "Z ${paths.config}/radarr 0770 radarr media -"
 
-    "d /mnt/storage/prowlarr 0770 prowlarr media -"
-    "Z /mnt/storage/prowlarr 0770 prowlarr media -"
+    "d ${paths.config}/prowlarr 0770 prowlarr media -"
+    "Z ${paths.config}/prowlarr 0770 prowlarr media -"
 
-    # Former Deluge config, kept until the switch to qBittorrent is confirmed.
-    "d /mnt/storage/deluge 0770 deluge media -"
-    "Z /mnt/storage/deluge 0770 deluge media -"
+    "d ${paths.config}/qbittorrent 0770 qbittorrent media -"
+    "Z ${paths.config}/qbittorrent 0770 qbittorrent media -"
 
-    "d /mnt/storage/qbittorrent 0770 qbittorrent media -"
-    "Z /mnt/storage/qbittorrent 0770 qbittorrent media -"
+    "d ${paths.torrents} 0770 qbittorrent media -"
+    "Z ${paths.torrents} 0770 qbittorrent media -"
 
-    "d /mnt/storage/torrents 0770 qbittorrent media -"
-    "Z /mnt/storage/torrents 0770 qbittorrent media -"
+    "d ${paths.intake} 0666 qbittorrent media -"
+    "Z ${paths.intake} 0666 qbittorrent media -"
 
-    "d /mnt/storage/movies_intake 0777 qbittorrent media -"
-    "Z /mnt/storage/movies_intake 0777 qbittorrent media -"
-
-    "d /mnt/storage/jellyseerr 0770 node media -"
-    "Z /mnt/storage/jellyseerr 0770 node media -"
+    "d ${paths.config}/jellyseerr 0770 1000 media -"
+    "Z ${paths.config}/jellyseerr 0770 1000 media -"
   ];
 
   cia.stacks.media = {
     source = ../stacks/media;
     dependsOn = [ "core" ];
     env = {
+      CONFIG_DIR = paths.config;
+      MEDIA_DIR = paths.media;
+      TORRENTS_DIR = paths.torrents;
+      INTAKE_DIR = paths.intake;
       TZ = config.time.timeZone;
       MEDIA_GID = config.users.groups.media.gid;
+      RENDER_GID = config.users.groups.render.gid;
       EMBY_UID = config.users.users.emby.uid;
       SONARR_UID = config.users.users.sonarr.uid;
       RADARR_UID = config.users.users.radarr.uid;

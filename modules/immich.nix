@@ -1,4 +1,7 @@
 { config, ... }:
+let
+  paths = config.cia.paths;
+in
 {
   users.groups = {
     immich = { gid = 2007; };
@@ -17,18 +20,25 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/storage/immich 0770 immich immich -"
-    "d /mnt/storage/immich/upload 0770 immich immich -"
-    "d /mnt/storage/immich/data 0770 immich immich -"
-    "d /mnt/storage/videos 0770 immich immich -"
+    # Database and model cache on the main drive
+    "d ${paths.config}/immich 0770 immich immich -"
+    "d ${paths.config}/immich/postgres 0770 immich immich -"
+    "d ${paths.config}/immich/model-cache 0770 immich immich -"
+
+    # Photos on the photos drive
+    "d ${paths.photos}/immich 0770 immich immich -"
+    "d ${paths.photos}/immich/upload 0770 immich immich -"
+    "d ${paths.photos}/videos 0770 immich immich -"
   ];
 
   cia.stacks.immich = {
     source = ../stacks/immich;
     dependsOn = [ "core" ];
     env = {
-      UPLOAD_LOCATION = "/mnt/storage/immich/upload";
-      DB_DATA_LOCATION = "/mnt/storage/immich/data";
+      UPLOAD_LOCATION = "${paths.photos}/immich/upload";
+      PICTURES_LOCATION = "${paths.photos}/pictures";
+      DB_DATA_LOCATION = "${paths.config}/immich/postgres";
+      MODEL_CACHE_LOCATION = "${paths.config}/immich/model-cache";
       TZ = config.time.timeZone;
       IMMICH_GID = config.users.groups.immich.gid;
 
