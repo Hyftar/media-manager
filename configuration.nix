@@ -16,6 +16,8 @@
 
   time.timeZone = "America/Toronto";
 
+  i18n.extraLocales = [ "en_CA.UTF-8/UTF-8" ];
+
   services.openssh = {
     enable = true;
     settings = {
