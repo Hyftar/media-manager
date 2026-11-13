@@ -6,7 +6,7 @@ let
   # them (and check the labels/UUIDs still match).
 
   paths = config.cia.paths;
-  dataDrivesInstalled = false;
+  dataDrivesInstalled = true;
 in
 {
   nixpkgs.config.allowUnfree = true;
