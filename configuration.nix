@@ -164,7 +164,7 @@
       wantedBy = [ "multi-user.target" ];
       serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
       script = ''
-        if ! ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' | grep -q active; then
+        if ! ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' | grep -qx active; then
           # Advertise the LAN address (source of the default route), whatever DHCP gave us.
           addr=$(${pkgs.iproute2}/bin/ip -4 route get 1.1.1.1 \
             | ${pkgs.gnused}/bin/sed -n 's/.* src \([0-9.]*\).*/\1/p')
