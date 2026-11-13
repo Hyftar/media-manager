@@ -7,6 +7,7 @@
     ./modules/media.nix
     ./modules/immich.nix
     ./modules/backup.nix
+    ./modules/migration.nix
   ];
 
   system.stateVersion = "26.05";
@@ -155,14 +156,18 @@
 
   systemd.services.docker-swarm-init = {
       description = "Initialize single-node Docker Swarm";
-      after = [ "docker.service" ];
+      after = [ "docker.service" "network-online.target" ];
       requires = [ "docker.service" ];
+      wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = { Type = "oneshot"; RemainAfterExit = true; };
       script = ''
-        ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' \
-          | grep -q active \
-          || ${pkgs.docker}/bin/docker swarm init --advertise-addr 192.168.0.50
+        if ! ${pkgs.docker}/bin/docker info --format '{{.Swarm.LocalNodeState}}' | grep -q active; then
+          # Advertise the LAN address (source of the default route), whatever DHCP gave us.
+          addr=$(${pkgs.iproute2}/bin/ip -4 route get 1.1.1.1 \
+            | ${pkgs.gnused}/bin/sed -n 's/.* src \([0-9.]*\).*/\1/p')
+          ${pkgs.docker}/bin/docker swarm init --advertise-addr "$addr"
+        fi
 
         ${pkgs.docker}/bin/docker network inspect cia-overlay >/dev/null 2>&1 \
           || ${pkgs.docker}/bin/docker network create \
