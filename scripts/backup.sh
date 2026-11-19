@@ -77,13 +77,18 @@ run_backup() {
 
   log "--- Backing up: ${paths[*]} -> ${repo} ---"
 
+  local progress=()
+  if [[ -t 2 ]]; then
+    progress=(--progress)
+  fi
+
   log "Creating archive: ${archive_name}"
   borg create \
     --verbose \
     --stats \
     --show-rc \
     --compression lz4 \
-    --progress \
+    "${progress[@]}" \
     "${repo}::${archive_name}" \
     "${paths[@]}"
 
