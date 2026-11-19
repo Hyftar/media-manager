@@ -22,7 +22,6 @@ in
   systemd.tmpfiles.rules = [
     # Database and model cache on the main drive
     "d ${paths.config}/immich 0770 immich immich -"
-    "d ${paths.config}/immich/postgres 0770 immich immich -"
     "d ${paths.config}/immich/model-cache 0770 immich immich -"
 
     # Photos on the photos drive

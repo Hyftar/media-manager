@@ -53,12 +53,12 @@ services:
       # stacks resolve identically for Arcane and Docker.
       - ${STACKS_DIR}:${STACKS_DIR}
     environment:
-      APP_URL: https://docker.grosluxe.ca
       PUID: ${ARCANE_UID}
       PGID: ${ARCANE_GID}
       TZ: ${TZ}
-      ANALYTICS_DISABLED: "true"
-      PROJECTS_DIRECTORY: ${STACKS_DIR}
+      ARCANE_APP_URL: https://docker.grosluxe.ca
+      ARCANE_PROJECTS_DIRECTORY: ${STACKS_DIR}
+      ARCANE_ANALYTICS_ENABLED: false
     env_file:
       - ./secrets.env
     networks:

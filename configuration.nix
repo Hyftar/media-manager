@@ -138,7 +138,7 @@
   sops.secrets."arcane/encryption_key".sopsFile = ./secrets/arcane.yaml;
 
   sops.templates."arcane.env".content = ''
-    ENCRYPTION_KEY=${config.sops.placeholder."arcane/encryption_key"}
+    ARCANE_ENCRYPTION_KEY=${config.sops.placeholder."arcane/encryption_key"}
   '';
 
   cia.stacks.core = {
