@@ -50,7 +50,7 @@ recettes.grosluxe.ca {
   reverse_proxy mealie:9000
 }
 
-bingo.grosluxe.ca {
+subcipher.grosluxe.ca {
   import secure_headers
-  reverse_proxy yabet_app:4000
+ 	reverse_proxy subcipher_app:4000
 }
