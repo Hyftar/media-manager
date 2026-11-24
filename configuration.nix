@@ -7,6 +7,7 @@
     ./modules/media.nix
     ./modules/immich.nix
     ./modules/backup.nix
+    ./modules/subcipher.nix
   ];
 
   system.stateVersion = "26.05";
