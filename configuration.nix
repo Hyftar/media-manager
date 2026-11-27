@@ -6,6 +6,7 @@
     ./modules/stacks.nix
     ./modules/media.nix
     ./modules/immich.nix
+    ./modules/minecraft.nix
     ./modules/backup.nix
     ./modules/subcipher.nix
   ];

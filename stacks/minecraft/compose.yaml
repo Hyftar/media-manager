@@ -1,0 +1,110 @@
+name: minecraft-service
+
+services:
+  bedrock:
+    image: itzg/minecraft-bedrock-server:2026.11.1
+    container_name: minecraft_bedrock
+    restart: unless-stopped
+    environment:
+      EULA: "TRUE"
+      VERSION: LATEST
+      UID: ${MINECRAFT_UID}
+      GID: ${MINECRAFT_GID}
+      TZ: ${TZ}
+      ALLOW_LIST: false
+      # Must be an IP literal: clients get it as the gameplay address.
+      # <public_ip> is resolved at startup.
+      SERVER_UDP_PORTS: "<public_ip>:19140-19155:19140-19155"
+
+      # Every other variable the image accepts (2026.11.1), commented out with
+      # its default. Server property defaults are those of BDS 1.26.66's
+      # server.properties. An unset variable leaves its property alone, so
+      # edits made directly in /data/server.properties are kept.
+
+      # --- Server properties ---------------------------------------------
+      SERVER_NAME: Rum&Minecraft
+      # GAMEMODE: survival                   # survival | creative | adventure
+      FORCE_GAMEMODE: true                # force GAMEMODE on players who join
+      DIFFICULTY: normal                     # peaceful | easy | normal | hard
+      # ALLOW_CHEATS: false
+      MAX_PLAYERS: 20                      # keep <= the 16 UDP ports published below
+      # ONLINE_MODE: true                    # require Xbox Live sign-in
+      # SERVER_PORT: 19132                   # TCP signaling port (NetherNet)
+      # SERVER_PORT_V6: 19133                # RakNet only
+      # SERVER_IP: ""                        # address to bind; empty = all
+      # TRANSPORT: nethernet                 # nethernet | raknet
+      # ENABLE_LAN_VISIBILITY: true          # LAN discovery (UDP 7551)
+      # VIEW_DISTANCE: 32                    # chunks, >= 5
+      # TICK_DISTANCE: 4                     # chunks, 4-12
+      # PLAYER_IDLE_TIMEOUT: 30              # minutes before kicking idle players; 0 = never
+      MAX_THREADS: 0                         # 0 = as many as possible
+      # LEVEL_NAME: Bedrock level            # world folder in /data/worlds
+      # LEVEL_SEED: "-2965711870629693628"   # only used when the world is created
+      # LEVEL_TYPE: DEFAULT                  # DEFAULT | FLAT | LEGACY; only when the world is created
+      # DEFAULT_PLAYER_PERMISSION_LEVEL: member  # visitor | member | operator
+      # TEXTUREPACK_REQUIRED: false
+      # CONTENT_LOG_FILE_ENABLED: false
+      # CONTENT_LOG_CONSOLE_OUTPUT_ENABLED: false
+      # CONTENT_LOG_LEVEL: info              # verbose | info | warning | error
+      # COMPRESSION_THRESHOLD: 1             # bytes, 0-65535
+      # COMPRESSION_ALGORITHM: zlib          # zlib | snappy
+      # PLAYER_POSITION_ACCEPTANCE_THRESHOLD: 0.5
+      # PLAYER_MOVEMENT_ACTION_DIRECTION_THRESHOLD: 0.85
+      # SERVER_AUTHORITATIVE_BLOCK_BREAKING_PICK_RANGE_SCALAR: 1.5
+      # CHAT_RESTRICTION: None               # None | Dropped | Disabled
+      # DISABLE_PLAYER_INTERACTION: false
+      # CLIENT_SIDE_CHUNK_GENERATION_ENABLED: true
+      # BLOCK_NETWORK_IDS_ARE_HASHES: true
+      # DISABLE_PERSONA: false
+      # DISABLE_CUSTOM_SKINS: false
+      # SERVER_BUILD_RADIUS_RATIO: Disabled  # Disabled | 0.0-1.0
+      # ALLOW_OUTBOUND_SCRIPT_DEBUGGING: false
+      # ALLOW_INBOUND_SCRIPT_DEBUGGING: false
+      # SCRIPT_DEBUGGER_AUTO_ATTACH: disabled  # disabled | connect | listen
+
+      # --- Players ---------------------------------------------------------
+      # OPS: ""
+      # MEMBERS: ""
+      # VISITORS: ""
+      # ALLOW_LIST_USERS: ""                 # gamertag:XUID pairs; used when ALLOW_LIST is true
+      # WHITE_LIST_USERS: ""                 # old name of ALLOW_LIST_USERS
+      # RESOLVE_XUID_API_URL: https://mcprofile.io/api/v1/bedrock/gamertag
+
+      # --- World and add-ons -----------------------------------------------
+      # VARIABLES: ""                        # JSON or key:value,key:value -> config/default/variables.json
+      # MC_PACK: ""                          # path in the container to a .mcpack/.mcworld/.mcaddon/zip or folder
+      # FORCE_WORLD_COPY: false              # replace the world from MC_PACK on every start
+      # FORCE_PACK_COPY: false               # replace the packs from MC_PACK on every start
+
+      # --- Server download -------------------------------------------------
+      # PREVIEW: false                       # set to true with a specific preview VERSION
+      # DIRECT_DOWNLOAD_URL: ""              # skip the version lookup
+      # DOWNLOAD_PROGRESS: false
+      # PACKAGE_BACKUP_KEEP: 2               # copies of the previous server kept on upgrade
+      # USE_MINECRAFT_SERVICES: true         # look up versions through Mojang's API
+      # DOWNLOAD_LINKS_URL: https://net.web.minecraft-services.net/api/v1.0/download/links
+      # DOWNLOAD_SECONDARY_LINKS_URL: https://net.web.minecraft-services.net/api/v1.0/download/links
+      # PROCESSED_DOWNLOAD_LINKS_URL: https://raw.githubusercontent.com/kittizz/bedrock-server-downloads/refs/heads/main/bedrock-server-downloads.json
+
+      # --- Shutdown --------------------------------------------------------
+      # STOP_SERVER_ANNOUNCE_DELAY: 0        # seconds between the warning and stop; keep < stop_grace_period
+      # STOP_SERVER_ANNOUNCE: say Server shutting down in %delay% seconds
+
+      # --- Remote console --------------------------------------------------
+      # ENABLE_SSH: false                    # SSH console inside the container
+      # REMOTE_CONSOLE_BIND_ADDRESS: ":2222"
+      # RCON_PASSWORD: ""                    # random when unset
+
+      # --- Troubleshooting -------------------------------------------------
+      # DEBUG: false                         # trace the startup script
+      # DEBUG_CURL: false                    # verbose downloads (with DEBUG)
+      # ENABLE_BDS_V6BIND_FIX: false         # RakNet only: same port for IPv4 and IPv6
+      # USE_BOX64: true                      # ARM hosts only
+    ports:
+      - 19132:19132/tcp
+      - 19140-19155:19140-19155/udp
+    volumes:
+      - ${CONFIG_DIR}/minecraft:/data
+    stdin_open: true
+    tty: true
+    stop_grace_period: 1m
